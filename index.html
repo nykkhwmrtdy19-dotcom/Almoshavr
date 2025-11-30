@@ -3,17 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مشاور هوش مصنوعی - حکمت سنتی</title>
+    <title>چت بات</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: system-ui, -apple-system, sans-serif;
         }
         
         body {
-            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            background: #000;
             height: 100vh;
             overflow: hidden;
         }
@@ -21,36 +21,49 @@
         .chat-container {
             width: 100%;
             height: 100vh;
-            background: #ecf0f1;
+            background: #000;
             display: flex;
             flex-direction: column;
         }
         
-        .chat-header {
-            background: linear-gradient(135deg, #e67e22 0%, #d35400 100%);
-            color: white;
+        .mode-selector {
             padding: 20px;
-            text-align: center;
-            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+            background: #000;
+            border-bottom: 1px solid #333;
+            display: flex;
+            gap: 15px;
+            justify-content: center;
         }
         
-        .chat-header h1 {
-            font-size: 24px;
-            margin-bottom: 5px;
+        .mode-btn {
+            padding: 15px 30px;
+            border: 2px solid #333;
+            border-radius: 25px;
+            background: #1a1a1a;
+            color: #888;
+            cursor: pointer;
+            font-size: 16px;
             font-weight: 600;
+            transition: all 0.3s ease;
         }
         
-        .chat-header .status {
-            font-size: 14px;
-            opacity: 0.9;
-            font-weight: 300;
+        .mode-btn.active {
+            background: #10b981;
+            color: white;
+            border-color: #10b981;
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+        }
+        
+        .mode-btn:hover {
+            border-color: #10b981;
+            color: #10b981;
         }
         
         .chat-messages {
             flex: 1;
             padding: 20px;
             overflow-y: auto;
-            background: linear-gradient(180deg, #ecf0f1 0%, #dfe6e9 100%);
+            background: #000;
             display: flex;
             flex-direction: column;
         }
@@ -59,11 +72,11 @@
             margin-bottom: 15px;
             display: flex;
             align-items: flex-start;
-            animation: fadeIn 0.4s ease-out;
+            animation: fadeIn 0.3s ease-out;
         }
         
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
+            from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
         
@@ -76,40 +89,62 @@
         }
         
         .message-bubble {
-            max-width: 75%;
+            max-width: 80%;
             padding: 15px 20px;
             border-radius: 20px;
-            font-size: 15px;
+            font-size: 16px;
             line-height: 1.6;
             word-wrap: break-word;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
         
         .user-message .message-bubble {
-            background: linear-gradient(135deg, #e67e22 0%, #d35400 100%);
+            background: #10b981;
             color: white;
-            border-bottom-right-radius: 5px;
+            border-bottom-right-radius: 8px;
         }
         
         .bot-message .message-bubble {
-            background: white;
-            color: #2c3e50;
-            border: 1px solid #bdc3c7;
-            border-bottom-left-radius: 5px;
-            border-left: 4px solid #e67e22;
+            background: #1a1a1a;
+            color: white;
+            border-bottom-left-radius: 8px;
+            border: 1px solid #333;
+        }
+        
+        .code-block {
+            background: #1a1a1a;
+            padding: 15px;
+            border-radius: 12px;
+            margin: 10px 0;
+            border-left: 4px solid #10b981;
+            direction: ltr;
+            text-align: left;
+            position: relative;
+            border: 1px solid #333;
+        }
+        
+        .copy-btn {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
         }
         
         .typing-indicator {
             display: none;
-            padding: 12px 18px;
-            background: white;
+            padding: 15px 20px;
+            background: #1a1a1a;
             border-radius: 20px;
-            border-bottom-left-radius: 5px;
+            border-bottom-left-radius: 8px;
             margin-bottom: 15px;
             align-items: center;
-            max-width: 90px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            border-left: 4px solid #e67e22;
+            max-width: 70px;
+            border: 1px solid #333;
         }
         
         .typing-dots {
@@ -120,7 +155,7 @@
         .typing-dot {
             width: 8px;
             height: 8px;
-            background: #e67e22;
+            background: #10b981;
             border-radius: 50%;
             animation: typing 1.4s infinite ease-in-out;
         }
@@ -129,57 +164,54 @@
         .typing-dot:nth-child(2) { animation-delay: -0.16s; }
         
         @keyframes typing {
-            0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; }
+            0%, 80%, 100% { transform: scale(0.8); opacity: 0.4; }
             40% { transform: scale(1); opacity: 1; }
         }
         
         .chat-input-container {
             padding: 20px;
-            background: white;
-            border-top: 2px solid #bdc3c7;
+            background: #000;
+            border-top: 1px solid #333;
             display: flex;
             gap: 12px;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
         }
         
         .chat-input {
             flex: 1;
-            padding: 15px 20px;
-            border: 2px solid #bdc3c7;
+            padding: 16px 20px;
+            border: 1px solid #333;
             border-radius: 25px;
             outline: none;
             font-size: 16px;
-            transition: all 0.3s ease;
-            background: #f8f9fa;
+            background: #1a1a1a;
+            color: white;
+            transition: all 0.2s ease;
         }
         
         .chat-input:focus {
-            border-color: #e67e22;
-            box-shadow: 0 0 0 3px rgba(230, 126, 34, 0.1);
-            background: white;
+            border-color: #10b981;
+            background: #1a1a1a;
+        }
+        
+        .chat-input::placeholder {
+            color: #666;
         }
         
         .send-button {
-            background: linear-gradient(135deg, #e67e22 0%, #d35400 100%);
+            background: #10b981;
             color: white;
             border: none;
-            padding: 15px 25px;
+            padding: 16px 24px;
             border-radius: 25px;
             cursor: pointer;
             font-size: 16px;
             font-weight: 600;
-            transition: all 0.3s ease;
-            min-width: 80px;
-            box-shadow: 0 4px 12px rgba(230, 126, 34, 0.3);
+            transition: all 0.2s ease;
+            min-width: 70px;
         }
         
         .send-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 18px rgba(230, 126, 34, 0.4);
-        }
-        
-        .send-button:active {
-            transform: translateY(0);
+            background: #0da271;
         }
 
         /* استایل اسکرول بار */
@@ -188,50 +220,69 @@
         }
         
         .chat-messages::-webkit-scrollbar-track {
-            background: #dfe6e9;
-            border-radius: 3px;
+            background: #1a1a1a;
         }
         
         .chat-messages::-webkit-scrollbar-thumb {
-            background: #e67e22;
+            background: #10b981;
             border-radius: 3px;
         }
         
-        .chat-messages::-webkit-scrollbar-thumb:hover {
-            background: #d35400;
+        .system-message {
+            justify-content: center;
+        }
+        
+        .system-message .message-bubble {
+            background: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+            border: 1px dashed #10b981;
+            font-size: 14px;
+            text-align: center;
+            padding: 12px 20px;
         }
 
-        /* موبایل ریسپانسیو */
         @media (max-width: 768px) {
-            .chat-container {
-                height: 100vh;
+            .mode-selector {
+                padding: 15px;
+            }
+            
+            .mode-btn {
+                padding: 12px 24px;
+                font-size: 14px;
+            }
+            
+            .chat-messages {
+                padding: 15px;
             }
             
             .message-bubble {
                 max-width: 85%;
                 padding: 12px 16px;
-                font-size: 14px;
-            }
-            
-            .chat-header {
-                padding: 15px;
-            }
-            
-            .chat-header h1 {
-                font-size: 20px;
+                font-size: 15px;
             }
             
             .chat-input-container {
                 padding: 15px;
             }
         }
+
+        /* انیمیشن برای دکمه فعال */
+        @keyframes pulse-green {
+            0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+        
+        .mode-btn.active {
+            animation: pulse-green 2s infinite;
+        }
     </style>
 </head>
 <body>
     <div class="chat-container">
-        <div class="chat-header">
-            <h1>🧠 مشاور حکمت سنتی</h1>
-            <div class="status">آنلاین - آماده ارائه راهنمایی‌های کاربردی</div>
+        <div class="mode-selector">
+            <button class="mode-btn active" onclick="setMode('programming')">برنامه نویسی</button>
+            <button class="mode-btn" onclick="setMode('general')">اطلاعات عمومی</button>
         </div>
         
         <div class="chat-messages" id="chatMessages">
@@ -248,122 +299,78 @@
         
         <div class="chat-input-container">
             <input type="text" class="chat-input" id="chatInput" 
-                   placeholder="سوال یا مشکل خود را اینجا بنویسید..." 
+                   placeholder="پیام خود را بنویسید..." 
                    onkeypress="handleKeyPress(event)">
             <button class="send-button" onclick="sendMessage()">ارسال</button>
         </div>
     </div>
 
     <script>
-        // 📁 مسیر فایل‌های m1.txt تا m50.txt
-        const textFiles = [];
-        for (let i = 1; i <= 50; i++) {
-            textFiles.push(`./m${i}.txt`);
+        // تولید مسیر 200 فایل
+        const programmingFiles = [];
+        const generalFiles = [];
+        
+        for (let i = 1; i <= 100; i++) {
+            programmingFiles.push(`programming/m${i}.txt`);
+            generalFiles.push(`general/m${i}.txt`);
         }
 
-        let knowledgeBase = {};
+        // پایگاه دانش
+        const knowledgeBase = {
+            programming: {
+                "جاوااسکریپت": "جاوااسکریپت یک زبان برنامه‌نویسی سطح بالا و مفسری است.\n\n```javascript\nfunction greet(name) {\n    return `Hello, ${name}!`;\n}\nconsole.log(greet('World'));\n```",
+                "پایتون": "پایتون یک زبان برنامه‌نویسی سطح بالا و همه‌منظوره است.\n\n```python\ndef greet(name):\n    return f\"Hello, {name}!\"\n\nprint(greet(\"World\"))\n```",
+                "html": "HTML زبان نشانه‌گذاری برای ساخت صفحات وب است.\n\n```html\n<!DOCTYPE html>\n<html>\n<head>\n    <title>صفحه من</title>\n</head>\n<body>\n    <h1>سلام دنیا!</h1>\n</body>\n</html>\n```",
+                "css": "CSS برای استایل‌دهی به صفحات وب استفاده می‌شود.\n\n```css\nbody {\n    font-family: Arial, sans-serif;\n    background-color: #f0f0f0;\n}\n\n.container {\n    max-width: 1200px;\n    margin: 0 auto;\n}\n```",
+                "react": "React یک کتابخانه جاوااسکریپت برای ساخت رابط کاربری است.\n\n```jsx\nimport React from 'react';\n\nfunction App() {\n    return (\n        <div>\n            <h1>Hello React!</h1>\n        </div>\n    );\n}\n\nexport default App;\n```"
+            },
+            general: {
+                "تاریخ ایران": "ایران دارای تاریخ کهنی است که به هزاران سال قبل برمی‌گردد. تمدن‌های بزرگی مانند ایلامی‌ها، مادها، هخامنشیان، ساسانیان و... در این سرزمین شکل گرفته‌اند.",
+                "جغرافیا": "ایران در خاورمیانه واقع شده و دارای آب و هوای متنوعی است. کوه‌های زاگرس و البرز از مهم‌ترین رشته‌کوه‌های ایران هستند.",
+                "علم": "دانشمندان ایرانی مانند ابوعلی سینا، خوارزمی، بیرونی و زکریای رازی سهم بزرگی در پیشرفت علم جهان داشته‌اند.",
+                "ادبیات": "ادبیات فارسی با شاعرانی مانند فردوسی، حافظ، سعدی و مولوی غنی شده است. شاهنامه فردوسی از مهم‌ترین آثار ادبی جهان است.",
+                "فرهنگ": "فرهنگ ایرانی ترکیبی از آداب و رسوم کهن و مدرن است. نوروز، یلدا و چهارشنبه‌سوری از مهم‌ترین آیین‌های ایرانی هستند."
+            }
+        };
+
+        let currentMode = 'programming';
         let isTyping = false;
-        let filesLoaded = false;
 
-        // 📖 لود کردن همه فایل‌ها
-        async function loadTextFiles() {
-            const loadedKnowledge = {};
-            let loadedCount = 0;
-            
-            const loadPromises = textFiles.map(async (filePath) => {
-                try {
-                    const response = await fetch(filePath);
-                    if (response.ok) {
-                        const text = await response.text();
-                        processTextFile(text, loadedKnowledge);
-                        loadedCount++;
-                    }
-                } catch (error) {
-                    console.log(`فایل ${filePath} لود نشد`);
-                }
-            });
-            
-            await Promise.all(loadPromises);
-            knowledgeBase = loadedKnowledge;
-            filesLoaded = true;
-            console.log(`✅ ${loadedCount} فایل از 50 فایل لود شد`);
-        }
-
-        // 🔧 پردازش فایل متنی
-        function processTextFile(text, knowledge) {
-            const lines = text.split('\n').filter(line => line.trim());
-            
-            for (const line of lines) {
-                const parts = line.split('|');
-                if (parts.length >= 2) {
-                    const keyword = parts[0].trim();
-                    const response = parts[1].trim();
-                    
-                    if (keyword && response) {
-                        if (!knowledge[keyword]) {
-                            knowledge[keyword] = [];
-                        }
-                        knowledge[keyword].push(response);
-                    }
-                }
-            }
-        }
-
-        // 🔍 سیستم جستجوی پیشرفته
+        // سیستم جستجوی پیشرفته
         function findBestResponse(userMessage) {
-            if (!filesLoaded) {
-                return "🔄 در حال بارگذاری دانش... لطفاً چند لحظه صبر کنید";
-            }
-
-            if (Object.keys(knowledgeBase).length === 0) {
-                return "❌ هیچ فایل دانشی یافت نشد. لطفاً از وجود فایل‌های m1.txt تا m50.txt اطمینان حاصل کنید";
-            }
-
             const message = userMessage.toLowerCase().trim();
-            
-            // 1. جستجوی دقیق
-            for (const keyword in knowledgeBase) {
+            const currentKnowledge = knowledgeBase[currentMode];
+
+            // جستجوی دقیق
+            for (const keyword in currentKnowledge) {
                 if (message === keyword.toLowerCase()) {
-                    const responses = knowledgeBase[keyword];
-                    return responses[Math.floor(Math.random() * responses.length)];
+                    return currentKnowledge[keyword];
                 }
             }
-            
-            // 2. جستجوی شامل
-            for (const keyword in knowledgeBase) {
+
+            // جستجوی شامل
+            for (const keyword in currentKnowledge) {
                 if (message.includes(keyword.toLowerCase())) {
-                    const responses = knowledgeBase[keyword];
-                    return responses[Math.floor(Math.random() * responses.length)];
+                    return currentKnowledge[keyword];
                 }
             }
-            
-            // 3. جستجوی کلمات کلیدی
+
+            // جستجوی کلمات کلیدی
             const words = message.split(' ').filter(word => word.length > 2);
-            let bestMatch = null;
-            let bestMatchLength = 0;
-            
             for (const word of words) {
-                for (const keyword in knowledgeBase) {
+                for (const keyword in currentKnowledge) {
                     if (keyword.toLowerCase().includes(word)) {
-                        const responses = knowledgeBase[keyword];
-                        // انتخاب بهترین match بر اساس طول کلمه
-                        if (word.length > bestMatchLength) {
-                            bestMatch = responses;
-                            bestMatchLength = word.length;
-                        }
+                        return currentKnowledge[keyword];
                     }
                 }
             }
-            
-            if (bestMatch) {
-                return bestMatch[Math.floor(Math.random() * bestMatch.length)];
-            }
-            
-            // 4. اگر هیچ چیزی پیدا نشد
-            return "🤔 متأسفانه پاسخی برای این سوال در دانش من وجود ندارد. لطفاً سوال خود را به صورت دیگری بیان کنید یا موضوع دیگری را جویا شوید.";
+
+            return currentMode === 'programming' 
+                ? "در مورد کدام زبان یا تکنولوژی برنامه‌نویسی سوال دارید؟ (مثال: جاوااسکریپت، پایتون، React و...)"
+                : "چه موضوعی از اطلاعات عمومی مورد نظر شماست؟ (مثال: تاریخ، جغرافیا، علم و...)";
         }
 
-        // 💬 افزودن پیام با تایپ کردن progressive
+        // سیستم نمایش پیام‌ها
         function addMessage(message, isUser = false) {
             const chatMessages = document.getElementById('chatMessages');
             const messageDiv = document.createElement('div');
@@ -377,17 +384,88 @@
                 messageDiv.appendChild(bubble);
                 chatMessages.appendChild(messageDiv);
             } else {
-                messageDiv.appendChild(bubble);
-                chatMessages.appendChild(messageDiv);
-                typeText(bubble, message);
+                // تشخیص کد و فرمت‌بندی
+                if (currentMode === 'programming' && containsCode(message)) {
+                    const formattedMessage = formatCodeMessage(message);
+                    bubble.innerHTML = formattedMessage;
+                    messageDiv.appendChild(bubble);
+                    chatMessages.appendChild(messageDiv);
+                    
+                    // اضافه کردن قابلیت کپی
+                    setTimeout(() => {
+                        addCopyButtons();
+                    }, 100);
+                } else {
+                    messageDiv.appendChild(bubble);
+                    chatMessages.appendChild(messageDiv);
+                    typeText(bubble, message);
+                }
             }
             
-            // اسکرول به پایین
             chatMessages.scrollTop = chatMessages.scrollHeight;
         }
 
-        // ⌨️ تایپ کردن متن (مثل من)
-        function typeText(element, text, speed = 25) {
+        function containsCode(message) {
+            return message.includes('```') || 
+                   message.includes('function') || 
+                   message.includes('class') || 
+                   message.includes('var ') || 
+                   message.includes('let ') || 
+                   message.includes('const ') ||
+                   message.includes('import ') ||
+                   message.includes('def ') ||
+                   message.includes('{') && message.includes('}');
+        }
+
+        function formatCodeMessage(message) {
+            // جدا کردن کد از متن معمولی
+            const parts = message.split('```');
+            let formatted = '';
+            
+            for (let i = 0; i < parts.length; i++) {
+                if (i % 2 === 0) {
+                    // متن معمولی
+                    formatted += parts[i].replace(/\n/g, '<br>');
+                } else {
+                    // کد
+                    formatted += `<div class="code-block">
+                        <button class="copy-btn" onclick="copyCode(this)">کپی</button>
+                        <pre>${parts[i]}</pre>
+                    </div>`;
+                }
+            }
+            
+            return formatted;
+        }
+
+        function addCopyButtons() {
+            document.querySelectorAll('.code-block').forEach(block => {
+                if (!block.querySelector('.copy-btn')) {
+                    const copyBtn = document.createElement('button');
+                    copyBtn.className = 'copy-btn';
+                    copyBtn.textContent = 'کپی';
+                    copyBtn.onclick = function() { copyCode(this); };
+                    block.prepend(copyBtn);
+                }
+            });
+        }
+
+        function copyCode(button) {
+            const codeBlock = button.parentElement;
+            const code = codeBlock.querySelector('pre').textContent;
+            
+            navigator.clipboard.writeText(code).then(() => {
+                const originalText = button.textContent;
+                button.textContent = 'کپی شد!';
+                button.style.background = '#059669';
+                setTimeout(() => {
+                    button.textContent = originalText;
+                    button.style.background = '#10b981';
+                }, 2000);
+            });
+        }
+
+        function typeText(element, text, speed = 20) {
             if (isTyping) return;
             isTyping = true;
             
@@ -398,14 +476,9 @@
                 if (i < text.length) {
                     element.textContent += text.charAt(i);
                     i++;
-                    
-                    // اسکرول به پایین در حین تایپ
                     const chatMessages = document.getElementById('chatMessages');
                     chatMessages.scrollTop = chatMessages.scrollHeight;
-                    
-                    // سرعت تصادفی برای طبیعی‌تر شدن
-                    const randomSpeed = speed + Math.random() * 15;
-                    setTimeout(typeChar, randomSpeed);
+                    setTimeout(typeChar, speed + Math.random() * 10);
                 } else {
                     isTyping = false;
                 }
@@ -414,58 +487,56 @@
             typeChar();
         }
 
-        // 📤 ارسال پیام
+        function setMode(mode) {
+            currentMode = mode;
+            
+            // آپدیت ظاهر دکمه‌ها
+            document.querySelectorAll('.mode-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // پاک کردن چت
+            document.getElementById('chatMessages').innerHTML = '';
+        }
+
         function sendMessage() {
             const chatInput = document.getElementById('chatInput');
             const message = chatInput.value.trim();
             
             if (message === '') return;
             
-            // نمایش پیام کاربر
             addMessage(message, true);
             chatInput.value = '';
             
-            // مخفی کردن تایپینگ قبلی
             const typingIndicator = document.getElementById('typingIndicator');
             typingIndicator.style.display = 'none';
             
-            // تاخیر برای پردازش
             setTimeout(() => {
                 const response = findBestResponse(message);
-                
-                // نمایش تایپینگ
                 typingIndicator.style.display = 'flex';
-                
-                // تاخیر قبل از شروع تایپ (بر اساس طول پاسخ)
-                const typingDelay = 600 + (response.length * 2) + Math.random() * 400;
                 
                 setTimeout(() => {
                     typingIndicator.style.display = 'none';
                     addMessage(response);
-                }, typingDelay);
+                }, 800 + Math.random() * 400);
                 
-            }, 400 + Math.random() * 300);
+            }, 300 + Math.random() * 200);
         }
 
-        // 🔘 مدیریت دکمه Enter
         function handleKeyPress(event) {
             if (event.key === 'Enter') {
                 sendMessage();
             }
         }
 
-        // 🚀 راه‌اندازی سیستم
+        // راه‌اندازی
         document.addEventListener('DOMContentLoaded', function() {
-            // لود فایل‌های دانش
-            loadTextFiles();
-            
-            // فوکوس روی اینپوت
             const chatInput = document.getElementById('chatInput');
             chatInput.focus();
             
             // صفحه کاملاً خالی - هیچ پیام خوشامدگویی نمایش داده نمی‌شود
         });
-
     </script>
 </body>
 </html>
