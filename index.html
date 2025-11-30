@@ -129,10 +129,29 @@
             background: #10b981;
             color: white;
             border: none;
-            padding: 6px 12px;
+            padding: 8px 16px;
             border-radius: 6px;
             cursor: pointer;
             font-size: 12px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+        
+        .copy-btn:hover {
+            background: #0da271;
+        }
+        
+        .copy-btn.copied {
+            background: #059669;
+        }
+        
+        .code-content {
+            margin-top: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.4;
+            white-space: pre-wrap;
+            color: #e5e7eb;
         }
         
         .typing-indicator {
@@ -214,7 +233,6 @@
             background: #0da271;
         }
 
-        /* استایل اسکرول بار */
         .chat-messages::-webkit-scrollbar {
             width: 6px;
         }
@@ -227,18 +245,15 @@
             background: #10b981;
             border-radius: 3px;
         }
-        
-        .system-message {
-            justify-content: center;
+
+        @keyframes pulse-green {
+            0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
         }
         
-        .system-message .message-bubble {
-            background: rgba(16, 185, 129, 0.1);
-            color: #10b981;
-            border: 1px dashed #10b981;
-            font-size: 14px;
-            text-align: center;
-            padding: 12px 20px;
+        .mode-btn.active {
+            animation: pulse-green 2s infinite;
         }
 
         @media (max-width: 768px) {
@@ -264,17 +279,6 @@
             .chat-input-container {
                 padding: 15px;
             }
-        }
-
-        /* انیمیشن برای دکمه فعال */
-        @keyframes pulse-green {
-            0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
-            70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
-        }
-        
-        .mode-btn.active {
-            animation: pulse-green 2s infinite;
         }
     </style>
 </head>
@@ -306,72 +310,237 @@
     </div>
 
     <script>
-        // تولید مسیر 200 فایل
+        // تولید مسیر فایل‌ها - فقط فایل‌های m1.txt تا m100.txt
         const programmingFiles = [];
         const generalFiles = [];
         
         for (let i = 1; i <= 100; i++) {
-            programmingFiles.push(`programming/m${i}.txt`);
-            generalFiles.push(`general/m${i}.txt`);
+            programmingFiles.push(`m${i}.txt`);
+            generalFiles.push(`m${i}.txt`);
         }
 
-        // پایگاه دانش
-        const knowledgeBase = {
-            programming: {
-                "جاوااسکریپت": "جاوااسکریپت یک زبان برنامه‌نویسی سطح بالا و مفسری است.\n\n```javascript\nfunction greet(name) {\n    return `Hello, ${name}!`;\n}\nconsole.log(greet('World'));\n```",
-                "پایتون": "پایتون یک زبان برنامه‌نویسی سطح بالا و همه‌منظوره است.\n\n```python\ndef greet(name):\n    return f\"Hello, {name}!\"\n\nprint(greet(\"World\"))\n```",
-                "html": "HTML زبان نشانه‌گذاری برای ساخت صفحات وب است.\n\n```html\n<!DOCTYPE html>\n<html>\n<head>\n    <title>صفحه من</title>\n</head>\n<body>\n    <h1>سلام دنیا!</h1>\n</body>\n</html>\n```",
-                "css": "CSS برای استایل‌دهی به صفحات وب استفاده می‌شود.\n\n```css\nbody {\n    font-family: Arial, sans-serif;\n    background-color: #f0f0f0;\n}\n\n.container {\n    max-width: 1200px;\n    margin: 0 auto;\n}\n```",
-                "react": "React یک کتابخانه جاوااسکریپت برای ساخت رابط کاربری است.\n\n```jsx\nimport React from 'react';\n\nfunction App() {\n    return (\n        <div>\n            <h1>Hello React!</h1>\n        </div>\n    );\n}\n\nexport default App;\n```"
-            },
-            general: {
-                "تاریخ ایران": "ایران دارای تاریخ کهنی است که به هزاران سال قبل برمی‌گردد. تمدن‌های بزرگی مانند ایلامی‌ها، مادها، هخامنشیان، ساسانیان و... در این سرزمین شکل گرفته‌اند.",
-                "جغرافیا": "ایران در خاورمیانه واقع شده و دارای آب و هوای متنوعی است. کوه‌های زاگرس و البرز از مهم‌ترین رشته‌کوه‌های ایران هستند.",
-                "علم": "دانشمندان ایرانی مانند ابوعلی سینا، خوارزمی، بیرونی و زکریای رازی سهم بزرگی در پیشرفت علم جهان داشته‌اند.",
-                "ادبیات": "ادبیات فارسی با شاعرانی مانند فردوسی، حافظ، سعدی و مولوی غنی شده است. شاهنامه فردوسی از مهم‌ترین آثار ادبی جهان است.",
-                "فرهنگ": "فرهنگ ایرانی ترکیبی از آداب و رسوم کهن و مدرن است. نوروز، یلدا و چهارشنبه‌سوری از مهم‌ترین آیین‌های ایرانی هستند."
-            }
+        let knowledgeBase = {
+            programming: {},
+            general: {}
         };
-
         let currentMode = 'programming';
         let isTyping = false;
+        let filesLoaded = false;
+
+        // سیستم لود فایل‌ها
+        async function loadFiles() {
+            const loadPromises = [];
+            
+            // لود فایل‌های برنامه نویسی
+            for (const file of programmingFiles) {
+                loadPromises.push(loadFile(file, 'programming'));
+            }
+            
+            // لود فایل‌های اطلاعات عمومی
+            for (const file of generalFiles) {
+                loadPromises.push(loadFile(file, 'general'));
+            }
+            
+            await Promise.allSettled(loadPromises);
+            filesLoaded = true;
+            console.log('✅ همه فایل‌ها لود شدند');
+        }
+
+        async function loadFile(filePath, category) {
+            try {
+                const response = await fetch(filePath);
+                if (response.ok) {
+                    const text = await response.text();
+                    processFileContent(text, category, filePath);
+                    return { success: true, file: filePath };
+                } else {
+                    console.log(`⚠️ فایل ${filePath} پیدا نشد`);
+                    return { success: false, file: filePath };
+                }
+            } catch (error) {
+                console.log(`❌ خطا در لود فایل ${filePath}:`, error);
+                return { success: false, file: filePath, error: error.message };
+            }
+        }
+
+        function processFileContent(text, category, filePath) {
+            const lines = text.split('\n').filter(line => line.trim());
+            let processedCount = 0;
+            
+            lines.forEach(line => {
+                // فرمت: کلیدواژه|پاسخ
+                const parts = line.split('|');
+                if (parts.length >= 2) {
+                    const keyword = parts[0].trim().toLowerCase();
+                    const response = parts[1].trim();
+                    
+                    if (keyword && response) {
+                        if (!knowledgeBase[category][keyword]) {
+                            knowledgeBase[category][keyword] = [];
+                        }
+                        knowledgeBase[category][keyword].push({
+                            text: response,
+                            source: filePath,
+                            timestamp: Date.now()
+                        });
+                        processedCount++;
+                    }
+                }
+            });
+            
+            if (processedCount > 0) {
+                console.log(`📁 ${filePath}: ${processedCount} کلیدواژه پردازش شد`);
+            }
+        }
 
         // سیستم جستجوی پیشرفته
         function findBestResponse(userMessage) {
+            if (!filesLoaded) {
+                return {
+                    text: "🔄 در حال بارگذاری پایگاه دانش... لطفاً کمی صبر کنید",
+                    type: 'text'
+                };
+            }
+
             const message = userMessage.toLowerCase().trim();
             const currentKnowledge = knowledgeBase[currentMode];
 
-            // جستجوی دقیق
+            // اگر کاربر گفت "کد نده" یا "فقط کد نده"
+            if (message.includes('کد نده') || message.includes('فقط کد نده') || message.includes('بدون کد')) {
+                return {
+                    text: "حتماً! فقط توضیح متنی ارائه می‌دهم. چه سوالی دارید؟",
+                    type: 'text'
+                };
+            }
+
+            // 1. جستجوی دقیق
+            if (currentKnowledge[message]) {
+                const responses = currentKnowledge[message];
+                const response = responses[Math.floor(Math.random() * responses.length)];
+                return formatResponse(response.text);
+            }
+
+            // 2. جستجوی شامل
             for (const keyword in currentKnowledge) {
-                if (message === keyword.toLowerCase()) {
-                    return currentKnowledge[keyword];
+                if (message.includes(keyword)) {
+                    const responses = currentKnowledge[keyword];
+                    const response = responses[Math.floor(Math.random() * responses.length)];
+                    return formatResponse(response.text);
                 }
             }
 
-            // جستجوی شامل
-            for (const keyword in currentKnowledge) {
-                if (message.includes(keyword.toLowerCase())) {
-                    return currentKnowledge[keyword];
-                }
-            }
-
-            // جستجوی کلمات کلیدی
+            // 3. جستجوی کلمات کلیدی
             const words = message.split(' ').filter(word => word.length > 2);
+            let bestMatch = null;
+            let bestScore = 0;
+
             for (const word of words) {
                 for (const keyword in currentKnowledge) {
-                    if (keyword.toLowerCase().includes(word)) {
-                        return currentKnowledge[keyword];
+                    if (keyword.includes(word)) {
+                        const responses = currentKnowledge[keyword];
+                        const score = word.length / keyword.length;
+                        if (score > bestScore) {
+                            bestScore = score;
+                            bestMatch = responses[Math.floor(Math.random() * responses.length)];
+                        }
                     }
                 }
             }
 
-            return currentMode === 'programming' 
-                ? "در مورد کدام زبان یا تکنولوژی برنامه‌نویسی سوال دارید؟ (مثال: جاوااسکریپت، پایتون، React و...)"
-                : "چه موضوعی از اطلاعات عمومی مورد نظر شماست؟ (مثال: تاریخ، جغرافیا، علم و...)";
+            if (bestMatch) {
+                return formatResponse(bestMatch.text);
+            }
+
+            // 4. جستجوی مشابه
+            let similarMatch = null;
+            let similarScore = 0;
+
+            for (const keyword in currentKnowledge) {
+                const score = calculateSimilarity(message, keyword);
+                if (score > 0.5 && score > similarScore) {
+                    similarScore = score;
+                    const responses = currentKnowledge[keyword];
+                    similarMatch = responses[Math.floor(Math.random() * responses.length)];
+                }
+            }
+
+            if (similarMatch) {
+                return formatResponse(similarMatch.text);
+            }
+
+            // پاسخ پیش‌فرض
+            return {
+                text: currentMode === 'programming' 
+                    ? "🤔 متوجه سوال شما نشدم. می‌توانید در مورد زبان‌های برنامه‌نویسی، فریمورک‌ها، الگوریتم‌ها یا مفاهیم برنامه‌نویسی سوال بپرسید."
+                    : "🤔 متوجه سوال شما نشدم. می‌توانید در مورد تاریخ، جغرافیا، علم، فرهنگ یا اطلاعات عمومی سوال بپرسید.",
+                type: 'text'
+            };
+        }
+
+        function calculateSimilarity(str1, str2) {
+            if (str1 === str2) return 1.0;
+            
+            const longer = str1.length > str2.length ? str1 : str2;
+            const shorter = str1.length > str2.length ? str2 : str1;
+            
+            if (longer.length === 0) return 1.0;
+            
+            return (longer.length - editDistance(longer, shorter)) / parseFloat(longer.length);
+        }
+
+        function editDistance(str1, str2) {
+            const matrix = [];
+            
+            for (let i = 0; i <= str2.length; i++) {
+                matrix[i] = [i];
+            }
+            
+            for (let j = 0; j <= str1.length; j++) {
+                matrix[0][j] = j;
+            }
+            
+            for (let i = 1; i <= str2.length; i++) {
+                for (let j = 1; j <= str1.length; j++) {
+                    if (str2.charAt(i-1) === str1.charAt(j-1)) {
+                        matrix[i][j] = matrix[i-1][j-1];
+                    } else {
+                        matrix[i][j] = Math.min(
+                            matrix[i-1][j-1] + 1,
+                            matrix[i][j-1] + 1,
+                            matrix[i-1][j] + 1
+                        );
+                    }
+                }
+            }
+            
+            return matrix[str2.length][str1.length];
+        }
+
+        function formatResponse(text) {
+            // اگر کاربر گفت کد نده، حتی اگر متن شامل کد باشد آن را حذف می‌کنیم
+            const noCodeRequest = text.toLowerCase().includes('کد نده') || 
+                                text.toLowerCase().includes('فقط کد نده') ||
+                                text.toLowerCase().includes('بدون کد');
+            
+            if (noCodeRequest) {
+                // حذف بخش‌های کد از پاسخ
+                text = text.replace(/```[\s\S]*?```/g, '');
+            }
+            
+            const isCode = containsCode(text) && !noCodeRequest;
+            return {
+                text: text,
+                type: isCode ? 'code' : 'text'
+            };
+        }
+
+        function containsCode(text) {
+            return text.includes('```') || 
+                   /function\s+\w+|\bclass\s+\w+|\bvar\s+\w+|\blet\s+\w+|\bconst\s+\w+|\bimport\s+.+|\bdef\s+\w+|\bpublic\s+\w+|\bprivate\s+\w+|\bprotected\s+\w+|\bconsole\.log|\bprint\(|\becho\s+|\bSystem\.out\.println/.test(text);
         }
 
         // سیستم نمایش پیام‌ها
-        function addMessage(message, isUser = false) {
+        function addMessage(message, isUser = false, responseData = null) {
             const chatMessages = document.getElementById('chatMessages');
             const messageDiv = document.createElement('div');
             messageDiv.className = `message ${isUser ? 'user-message' : 'bot-message'}`;
@@ -384,41 +553,26 @@
                 messageDiv.appendChild(bubble);
                 chatMessages.appendChild(messageDiv);
             } else {
-                // تشخیص کد و فرمت‌بندی
-                if (currentMode === 'programming' && containsCode(message)) {
-                    const formattedMessage = formatCodeMessage(message);
-                    bubble.innerHTML = formattedMessage;
+                if (responseData && responseData.type === 'code') {
+                    bubble.innerHTML = formatCodeMessage(responseData.text);
                     messageDiv.appendChild(bubble);
                     chatMessages.appendChild(messageDiv);
                     
-                    // اضافه کردن قابلیت کپی
                     setTimeout(() => {
                         addCopyButtons();
                     }, 100);
                 } else {
+                    const text = responseData ? responseData.text : message;
                     messageDiv.appendChild(bubble);
                     chatMessages.appendChild(messageDiv);
-                    typeText(bubble, message);
+                    typeText(bubble, text);
                 }
             }
             
             chatMessages.scrollTop = chatMessages.scrollHeight;
         }
 
-        function containsCode(message) {
-            return message.includes('```') || 
-                   message.includes('function') || 
-                   message.includes('class') || 
-                   message.includes('var ') || 
-                   message.includes('let ') || 
-                   message.includes('const ') ||
-                   message.includes('import ') ||
-                   message.includes('def ') ||
-                   message.includes('{') && message.includes('}');
-        }
-
         function formatCodeMessage(message) {
-            // جدا کردن کد از متن معمولی
             const parts = message.split('```');
             let formatted = '';
             
@@ -429,8 +583,8 @@
                 } else {
                     // کد
                     formatted += `<div class="code-block">
-                        <button class="copy-btn" onclick="copyCode(this)">کپی</button>
-                        <pre>${parts[i]}</pre>
+                        <button class="copy-btn" onclick="copyCode(this)">کپی کد</button>
+                        <div class="code-content">${escapeHtml(parts[i])}</div>
                     </div>`;
                 }
             }
@@ -438,12 +592,18 @@
             return formatted;
         }
 
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
         function addCopyButtons() {
             document.querySelectorAll('.code-block').forEach(block => {
                 if (!block.querySelector('.copy-btn')) {
                     const copyBtn = document.createElement('button');
                     copyBtn.className = 'copy-btn';
-                    copyBtn.textContent = 'کپی';
+                    copyBtn.textContent = 'کپی کد';
                     copyBtn.onclick = function() { copyCode(this); };
                     block.prepend(copyBtn);
                 }
@@ -452,15 +612,22 @@
 
         function copyCode(button) {
             const codeBlock = button.parentElement;
-            const code = codeBlock.querySelector('pre').textContent;
+            const codeContent = codeBlock.querySelector('.code-content');
+            const code = codeContent.textContent;
             
             navigator.clipboard.writeText(code).then(() => {
                 const originalText = button.textContent;
                 button.textContent = 'کپی شد!';
-                button.style.background = '#059669';
+                button.classList.add('copied');
                 setTimeout(() => {
                     button.textContent = originalText;
-                    button.style.background = '#10b981';
+                    button.classList.remove('copied');
+                }, 2000);
+            }).catch(err => {
+                console.error('خطا در کپی کردن:', err);
+                button.textContent = 'خطا!';
+                setTimeout(() => {
+                    button.textContent = 'کپی کد';
                 }, 2000);
             });
         }
@@ -478,7 +645,9 @@
                     i++;
                     const chatMessages = document.getElementById('chatMessages');
                     chatMessages.scrollTop = chatMessages.scrollHeight;
-                    setTimeout(typeChar, speed + Math.random() * 10);
+                    
+                    const randomSpeed = speed + Math.random() * 15;
+                    setTimeout(typeChar, randomSpeed);
                 } else {
                     isTyping = false;
                 }
@@ -490,13 +659,11 @@
         function setMode(mode) {
             currentMode = mode;
             
-            // آپدیت ظاهر دکمه‌ها
             document.querySelectorAll('.mode-btn').forEach(btn => {
                 btn.classList.remove('active');
             });
             event.target.classList.add('active');
             
-            // پاک کردن چت
             document.getElementById('chatMessages').innerHTML = '';
         }
 
@@ -512,16 +679,21 @@
             const typingIndicator = document.getElementById('typingIndicator');
             typingIndicator.style.display = 'none';
             
+            // تاخیر طبیعی برای پردازش
+            const processingTime = 1000 + Math.random() * 2000;
+            
             setTimeout(() => {
                 const response = findBestResponse(message);
                 typingIndicator.style.display = 'flex';
                 
+                const typingDelay = 600 + (response.text.length * 3) + Math.random() * 400;
+                
                 setTimeout(() => {
                     typingIndicator.style.display = 'none';
-                    addMessage(response);
-                }, 800 + Math.random() * 400);
+                    addMessage(null, false, response);
+                }, typingDelay);
                 
-            }, 300 + Math.random() * 200);
+            }, processingTime);
         }
 
         function handleKeyPress(event) {
@@ -530,12 +702,13 @@
             }
         }
 
-        // راه‌اندازی
+        // راه‌اندازی سیستم
         document.addEventListener('DOMContentLoaded', function() {
             const chatInput = document.getElementById('chatInput');
             chatInput.focus();
             
-            // صفحه کاملاً خالی - هیچ پیام خوشامدگویی نمایش داده نمی‌شود
+            // لود فایل‌ها در پس‌زمینه
+            loadFiles();
         });
     </script>
 </body>
