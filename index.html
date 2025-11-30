@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>چت بات</title>
+    <title>هوش مصنوعی فارسی</title>
     <style>
         * {
             margin: 0;
@@ -303,267 +303,192 @@
         
         <div class="chat-input-container">
             <input type="text" class="chat-input" id="chatInput" 
-                   placeholder="پیام خود را بنویسید..." 
+                   placeholder="هر سوالی دارید بپرسید..." 
                    onkeypress="handleKeyPress(event)">
             <button class="send-button" onclick="sendMessage()">ارسال</button>
         </div>
     </div>
 
     <script>
-        // تولید مسیر 100 فایل - همه در همین پوشه
-        const fileNames = [];
-        for (let i = 1; i <= 100; i++) {
-            fileNames.push(`m${i}.txt`);
-        }
-
-        let knowledgeBase = {
-            programming: {},
-            general: {}
-        };
+        // سیستم هوش مصنوعی پیشرفته - بدون کلیدواژه ثابت
         let currentMode = 'programming';
         let isTyping = false;
-        let filesLoaded = false;
 
-        // سیستم لود فایل‌ها
-        async function loadFiles() {
-            console.log('📁 شروع لود فایل‌ها...');
-            
-            const loadPromises = fileNames.map(fileName => 
-                loadFile(fileName)
-            );
-            
-            const results = await Promise.allSettled(loadPromises);
-            const successfulLoads = results.filter(r => r.status === 'fulfilled' && r.value.success).length;
-            
-            filesLoaded = true;
-            console.log(`✅ ${successfulLoads} فایل از ${fileNames.length} فایل با موفقیت لود شد`);
-        }
-
-        async function loadFile(fileName) {
-            try {
-                const response = await fetch(fileName);
-                if (response.ok) {
-                    const text = await response.text();
-                    processFileContent(text, fileName);
-                    return { success: true, file: fileName };
-                }
-                return { success: false, file: fileName, error: 'File not found' };
-            } catch (error) {
-                return { success: false, file: fileName, error: error.message };
-            }
-        }
-
-        function processFileContent(text, fileName) {
-            const lines = text.split('\n').filter(line => line.trim());
-            let processedCount = 0;
-            
-            lines.forEach(line => {
-                const parts = line.split('|');
-                if (parts.length >= 2) {
-                    const keyword = parts[0].trim().toLowerCase();
-                    const response = parts[1].trim();
-                    
-                    if (keyword && response) {
-                        // تشخیص خودکار دسته‌بندی بر اساس محتوا
-                        const category = detectCategory(keyword, response);
-                        
-                        if (!knowledgeBase[category][keyword]) {
-                            knowledgeBase[category][keyword] = [];
-                        }
-                        knowledgeBase[category][keyword].push({
-                            text: response,
-                            source: fileName
-                        });
-                        processedCount++;
-                    }
-                }
-            });
-            
-            if (processedCount > 0) {
-                console.log(`📄 ${fileName}: ${processedCount} کلیدواژه پردازش شد`);
-            }
-        }
-
-        function detectCategory(keyword, response) {
-            // کلمات کلیدی مربوط به برنامه‌نویسی
-            const programmingKeywords = [
-                'جاوااسکریپت', 'پایتون', 'html', 'css', 'react', 'nodejs', 'جاوا',
-                'php', 'sql', 'دیتابیس', 'الگوریتم', 'برنامه', 'کد', 'فانکشن',
-                'کلاس', 'شی', 'آرایه', 'متد', 'کامپوننت', 'فریمورک', 'کتابخانه'
-            ];
-            
-            // کلمات کلیدی مربوط به اطلاعات عمومی
-            const generalKeywords = [
-                'تاریخ', 'جغرافیا', 'علم', 'فرهنگ', 'ادبیات', 'هنر', 'سیاست',
-                'اقتصاد', 'ورزش', 'سلامتی', 'طبیعت', 'حیوانات', 'گیاهان', 'فضا'
-            ];
-            
-            const lowerKeyword = keyword.toLowerCase();
-            const lowerResponse = response.toLowerCase();
-            
-            // بررسی کلمات کلیدی در keyword
-            for (const progKey of programmingKeywords) {
-                if (lowerKeyword.includes(progKey.toLowerCase()) || lowerResponse.includes(progKey.toLowerCase())) {
-                    return 'programming';
-                }
-            }
-            
-            for (const genKey of generalKeywords) {
-                if (lowerKeyword.includes(genKey.toLowerCase()) || lowerResponse.includes(genKey.toLowerCase())) {
-                    return 'general';
-                }
-            }
-            
-            // تشخیص پیش‌فرض بر اساس محتوا
-            if (lowerResponse.includes('function') || lowerResponse.includes('class') || 
-                lowerResponse.includes('var ') || lowerResponse.includes('const ') ||
-                lowerResponse.includes('import ') || lowerResponse.includes('export ') ||
-                lowerResponse.includes('console.log') || lowerResponse.includes('def ') ||
-                lowerResponse.includes('<?php')) {
-                return 'programming';
-            }
-            
-            return 'general';
-        }
-
-        // سیستم جستجوی پیشرفته
-        function findBestResponse(userMessage) {
-            if (!filesLoaded) {
-                return {
-                    text: "🔄 در حال بارگذاری پایگاه دانش... لطفاً کمی صبر کنید",
-                    type: 'text'
-                };
-            }
-
+        // سیستم درک و پردازش سوال کاربر
+        function understandAndRespond(userMessage) {
             const message = userMessage.toLowerCase().trim();
-            const currentKnowledge = knowledgeBase[currentMode];
+            
+            // تشخیص موضوع سوال
+            const topic = detectTopic(message);
+            const intent = detectIntent(message);
+            const context = analyzeContext(message);
+            
+            // تولید پاسخ هوشمند بر اساس موضوع و زمینه
+            return generateIntelligentResponse(topic, intent, context, userMessage);
+        }
 
-            // بررسی درخواست "کد نده"
-            const noCodeRequest = message.includes('کد نده') || message.includes('فقط کد نده') || message.includes('بدون کد');
+        // تشخیص موضوع سوال
+        function detectTopic(message) {
+            const topics = {
+                programming: [
+                    'جاوااسکریپت', 'پایتون', 'جاوا', 'سی پلاس', 'html', 'css', 'react',
+                    'vue', 'angular', 'node', 'php', 'sql', 'دیتابیس', 'الگوریتم',
+                    'برنامه', 'کد', 'فانکشن', 'کلاس', 'شی', 'آرایه', 'متد', 'کامپوننت',
+                    'فریمورک', 'کتابخانه', 'بک اند', 'فرانت اند', 'توسعه', 'دیباگ'
+                ],
+                general: [
+                    'تاریخ', 'جغرافیا', 'علم', 'فرهنگ', 'ادبیات', 'هنر', 'سیاست',
+                    'اقتصاد', 'ورزش', 'سلامتی', 'طبیعت', 'حیوانات', 'گیاهان', 'فضا',
+                    'نجوم', 'فیزیک', 'شیمی', 'زیست', 'ریاضی', 'پزشکی', 'تکنولوژی'
+                ]
+            };
 
-            // 1. جستجوی دقیق
-            if (currentKnowledge[message]) {
-                const responses = currentKnowledge[message];
-                const response = responses[Math.floor(Math.random() * responses.length)];
-                return formatResponse(response.text, noCodeRequest);
-            }
-
-            // 2. جستجوی شامل
-            for (const keyword in currentKnowledge) {
-                if (message.includes(keyword)) {
-                    const responses = currentKnowledge[keyword];
-                    const response = responses[Math.floor(Math.random() * responses.length)];
-                    return formatResponse(response.text, noCodeRequest);
-                }
-            }
-
-            // 3. جستجوی کلمات کلیدی
-            const words = message.split(' ').filter(word => word.length > 2);
-            let bestMatch = null;
-            let bestScore = 0;
-
-            for (const word of words) {
-                for (const keyword in currentKnowledge) {
-                    if (keyword.includes(word)) {
-                        const responses = currentKnowledge[keyword];
-                        const score = word.length / keyword.length;
-                        if (score > bestScore) {
-                            bestScore = score;
-                            bestMatch = responses[Math.floor(Math.random() * responses.length)];
-                        }
+            // تشخیص موضوع بر اساس کلمات موجود در سوال
+            for (const [category, words] of Object.entries(topics)) {
+                for (const word of words) {
+                    if (message.includes(word.toLowerCase())) {
+                        return { category, specificTopic: word };
                     }
                 }
             }
 
-            if (bestMatch) {
-                return formatResponse(bestMatch.text, noCodeRequest);
+            return { category: 'general', specificTopic: 'سوال عمومی' };
+        }
+
+        // تشخیص هدف کاربر از سوال
+        function detectIntent(message) {
+            if (message.includes('چیست') || message.includes('چه') || message.includes('معنی')) {
+                return 'تعریف';
+            } else if (message.includes('چگونه') || message.includes('چطوری') || message.includes('روش')) {
+                return 'آموزش';
+            } else if (message.includes('مقایسه') || message.includes('فرق')) {
+                return 'مقایسه';
+            } else if (message.includes('مزایا') || message.includes('معایب')) {
+                return 'تحلیل';
+            } else if (message.includes('مثال') || message.includes('نمونه')) {
+                return 'مثال';
+            } else {
+                return 'توضیح';
+            }
+        }
+
+        // تحلیل زمینه سوال
+        function analyzeContext(message) {
+            const context = {
+                hasCodeRequest: message.includes('کد') || message.includes('برنامه') || message.includes('function'),
+                noCodeRequest: message.includes('کد نده') || message.includes('بدون کد'),
+                needsExample: message.includes('مثال') || message.includes('نمونه'),
+                needsComparison: message.includes('مقایسه') || message.includes('فرق'),
+                isTechnical: message.includes('چگونه') || message.includes('طراحی') || message.includes('پیاده')
+            };
+            return context;
+        }
+
+        // تولید پاسخ هوشمند
+        function generateIntelligentResponse(topic, intent, context, originalMessage) {
+            let response = '';
+            
+            // تولید پاسخ بر اساس موضوع و هدف
+            switch (intent) {
+                case 'تعریف':
+                    response = generateDefinitionResponse(topic, context);
+                    break;
+                case 'آموزش':
+                    response = generateTutorialResponse(topic, context);
+                    break;
+                case 'مقایسه':
+                    response = generateComparisonResponse(topic, context);
+                    break;
+                case 'تحلیل':
+                    response = generateAnalysisResponse(topic, context);
+                    break;
+                case 'مثال':
+                    response = generateExampleResponse(topic, context);
+                    break;
+                default:
+                    response = generateExplanationResponse(topic, context, originalMessage);
             }
 
-            // 4. جستجوی مشابه
-            let similarMatch = null;
-            let similarScore = 0;
-
-            for (const keyword in currentKnowledge) {
-                const score = calculateSimilarity(message, keyword);
-                if (score > 0.5 && score > similarScore) {
-                    similarScore = score;
-                    const responses = currentKnowledge[keyword];
-                    similarMatch = responses[Math.floor(Math.random() * responses.length)];
-                }
+            // اضافه کردن کد در صورت درخواست و عدم منع
+            if (context.hasCodeRequest && !context.noCodeRequest && currentMode === 'programming') {
+                response += '\n\n' + generateCodeExample(topic, intent);
             }
 
-            if (similarMatch) {
-                return formatResponse(similarMatch.text, noCodeRequest);
-            }
-
-            // پاسخ پیش‌فرض
             return {
-                text: noCodeRequest ? 
-                    "✅ فقط توضیح متنی ارائه می‌دهم. چه سوالی دارید؟" :
-                    (currentMode === 'programming' 
-                        ? "🤔 متوجه سوال شما نشدم. می‌توانید در مورد زبان‌های برنامه‌نویسی سوال بپرسید."
-                        : "🤔 متوجه سوال شما نشدم. می‌توانید در مورد اطلاعات عمومی سوال بپرسید."),
-                type: 'text'
+                text: response,
+                type: (context.hasCodeRequest && !context.noCodeRequest) ? 'code' : 'text'
             };
         }
 
-        function calculateSimilarity(str1, str2) {
-            if (str1 === str2) return 1.0;
-            
-            const longer = str1.length > str2.length ? str1 : str2;
-            const shorter = str1.length > str2.length ? str2 : str1;
-            
-            if (longer.length === 0) return 1.0;
-            
-            return (longer.length - editDistance(longer, shorter)) / parseFloat(longer.length);
-        }
-
-        function editDistance(str1, str2) {
-            const matrix = [];
-            
-            for (let i = 0; i <= str2.length; i++) {
-                matrix[i] = [i];
-            }
-            
-            for (let j = 0; j <= str1.length; j++) {
-                matrix[0][j] = j;
-            }
-            
-            for (let i = 1; i <= str2.length; i++) {
-                for (let j = 1; j <= str1.length; j++) {
-                    if (str2.charAt(i-1) === str1.charAt(j-1)) {
-                        matrix[i][j] = matrix[i-1][j-1];
-                    } else {
-                        matrix[i][j] = Math.min(
-                            matrix[i-1][j-1] + 1,
-                            matrix[i][j-1] + 1,
-                            matrix[i-1][j] + 1
-                        );
-                    }
-                }
-            }
-            
-            return matrix[str2.length][str1.length];
-        }
-
-        function formatResponse(text, noCodeRequest) {
-            if (noCodeRequest) {
-                // حذف تمام کدها از پاسخ
-                text = text.replace(/```[\s\S]*?```/g, '');
-                text = text.replace(/function\s+[\w]+\s*\([^)]*\)\s*\{[\s\S]*?\}/g, '');
-                text = text.replace(/class\s+[\w]+\s*\{[\s\S]*?\}/g, '');
-            }
-            
-            const isCode = containsCode(text) && !noCodeRequest;
-            return {
-                text: text,
-                type: isCode ? 'code' : 'text'
+        // تولید پاسخ تعریفی
+        function generateDefinitionResponse(topic, context) {
+            const definitions = {
+                'جاوااسکریپت': 'جاوااسکریپت یک زبان برنامه‌نویسی سطح بالا، پویا و مفسری است که عمدتاً برای توسعه وب استفاده می‌شود. این زبان هم در سمت کلاینت و هم در سمت سرور قابل استفاده است.',
+                'پایتون': 'پایتون یک زبان برنامه‌نویسی سطح بالا، همه‌منظوره و مفسری است که برای خوانایی و سادگی طراحی شده است. در حوزه‌های مختلفی از جمله هوش مصنوعی، علم داده و توسعه وب استفاده می‌شود.',
+                'react': 'React یک کتابخانه جاوااسکریپت برای ساخت رابط‌های کاربری است که توسط فیسبوک توسعه یافته است. از کامپوننت‌های قابل استفاده مجدد و Virtual DOM استفاده می‌کند.',
+                'تاریخ': 'تاریخ مطالعه وقایع گذشته و تحلیل تأثیر آنها بر حال و آینده است. تاریخ به ما کمک می‌کند تا ریشه‌های فرهنگی، اجتماعی و سیاسی جوامع را درک کنیم.',
+                'جغرافیا': 'جغرافیا علم مطالعه زمین، محیط‌های طبیعی، جوامع انسانی و روابط متقابل آنهاست. این علم به درک بهتر جهان و چالش‌های محیطی کمک می‌کند.'
             };
+
+            return definitions[topic.specificTopic] || `منظور شما از "${topic.specificTopic}" چیست؟ می‌توانید سوال خود را دقیق‌تر بیان کنید.`;
         }
 
-        function containsCode(text) {
-            return text.includes('```') || 
-                   /function\s+\w+|\bclass\s+\w+|\bvar\s+\w+|\blet\s+\w+|\bconst\s+\w+|\bimport\s+.+|\bdef\s+\w+/.test(text);
+        // تولید پاسخ آموزشی
+        function generateTutorialResponse(topic, context) {
+            const tutorials = {
+                'جاوااسکریپت': 'برای شروع یادگیری جاوااسکریپت، ابتدا با مفاهیم پایه مانند متغیرها، توابع و حلقه‌ها آشنا شوید. سپس DOM manipulation و رویدادها را یاد بگیرید.',
+                'پایتون': 'پایتون با syntax ساده‌اش برای مبتدیان عالی است. با انواع داده‌ها، ساختارهای کنترل و توابع شروع کنید، سپس به سراغ مفاهیم پیشرفته‌تر بروید.',
+                'react': 'برای یادگیری React ابتدا با JSX و کامپوننت‌ها آشنا شوید. سپس state و props را یاد بگیرید و در نهایت به سراغ hooks و routing بروید.'
+            };
+
+            return tutorials[topic.specificTopic] || `برای یادگیری ${topic.specificTopic}، پیشنهاد می‌کنم با مفاهیم پایه شروع کنید و به تدریج به مباحث پیشرفته‌تر برسید.`;
+        }
+
+        // تولید پاسخ تحلیلی
+        function generateAnalysisResponse(topic, context) {
+            return `در تحلیل ${topic.specificTopic} باید جوانب مختلفی را در نظر گرفت. مزایا و معایب آن بستگی به زمینه استفاده و نیازهای خاص شما دارد.`;
+        }
+
+        // تولید پاسخ مقایسه‌ای
+        function generateComparisonResponse(topic, context) {
+            return `برای مقایسه ${topic.specificTopic} با سایر موارد مشابه، باید معیارهای مختلفی مانند کارایی، سهولت استفاده، جامعه کاربری و موارد استفاده را در نظر گرفت.`;
+        }
+
+        // تولید پاسخ مثالی
+        function generateExampleResponse(topic, context) {
+            return `در ادامه یک مثال کاربردی از ${topic.specificTopic} ارائه می‌دهم:`;
+        }
+
+        // تولید پاسخ توضیحی
+        function generateExplanationResponse(topic, context, originalMessage) {
+            return `سوال خوبی پرسیدید! ${topic.specificTopic} موضوع جالبی است که می‌توانم در مورد آن توضیح دهم. آیا می‌خواهید جزئیات بیشتری بدانید؟`;
+        }
+
+        // تولید مثال کد
+        function generateCodeExample(topic, intent) {
+            const codeExamples = {
+                'جاوااسکریپت': `// مثال ساده جاوااسکریپت
+function greet(name) {
+    return 'سلام ' + name + '!';
+}
+
+console.log(greet('کاربر'));`,
+                'پایتون': `# مثال ساده پایتون
+def greet(name):
+    return f"سلام {name}!"
+
+print(greet("کاربر"))`,
+                'react': `// مثال کامپوننت React
+import React from 'react';
+
+function Welcome(props) {
+    return <h1>سلام, {props.name}</h1>;
+}
+
+export default Welcome;`
+            };
+
+            return '```\n' + (codeExamples[topic.specificTopic] || '// کد مثال') + '\n```';
         }
 
         // سیستم نمایش پیام‌ها
@@ -703,13 +628,14 @@
             const typingIndicator = document.getElementById('typingIndicator');
             typingIndicator.style.display = 'none';
             
-            const processingTime = 1000 + Math.random() * 2000;
+            // تاخیر برای شبیه‌سازی پردازش هوشمند
+            const processingTime = 1500 + Math.random() * 2000;
             
             setTimeout(() => {
-                const response = findBestResponse(message);
+                const response = understandAndRespond(message);
                 typingIndicator.style.display = 'flex';
                 
-                const typingDelay = 600 + (response.text.length * 3) + Math.random() * 400;
+                const typingDelay = 800 + (response.text.length * 3) + Math.random() * 500;
                 
                 setTimeout(() => {
                     typingIndicator.style.display = 'none';
@@ -729,7 +655,6 @@
         document.addEventListener('DOMContentLoaded', function() {
             const chatInput = document.getElementById('chatInput');
             chatInput.focus();
-            loadFiles();
         });
     </script>
 </body>
