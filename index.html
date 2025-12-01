@@ -2,251 +2,341 @@
 <html lang="fa" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>سیستم کدهای آماده</title>
     <style>
+        /* Reset و جلوگیری کامل از زوم و حرکت */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: system-ui, -apple-system, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-user-drag: none;
+            user-select: none;
+            touch-action: none;
         }
         
-        body {
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
             background: #000;
-            height: 100vh;
+            font-family: system-ui, -apple-system, sans-serif;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+        }
+        
+        /* جلوگیری کامل از هرگونه حرکت و زوم */
+        body {
+            overscroll-behavior: none;
+            -webkit-overflow-scrolling: none;
             overflow: hidden;
         }
         
-        .container {
-            width: 100%;
-            height: 100vh;
-            background: #000;
-            display: flex;
-            flex-direction: column;
-        }
-        
-        /* منوی اصلی */
-        .main-menu {
+        /* منوی همبرگری - کوچک شده */
+        .hamburger-menu {
             position: fixed;
             top: 10px;
             left: 10px;
             z-index: 1000;
-        }
-        
-        .main-menu-btn {
             background: #10b981;
-            color: white;
-            border: none;
-            padding: 10px 20px;
+            width: 40px;
+            height: 40px;
             border-radius: 8px;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-        
-        .main-menu-btn:hover {
-            background: #0da271;
-        }
-        
-        .categories-menu {
-            display: none;
-            position: absolute;
-            top: 100%;
-            left: 0;
-            background: #1a1a1a;
-            border: 1px solid #333;
-            border-radius: 8px;
-            padding: 15px;
-            width: 300px;
-            max-height: 80vh;
-            overflow-y: auto;
-        }
-        
-        .main-menu:hover .categories-menu {
-            display: block;
-        }
-        
-        .category-section {
-            margin-bottom: 15px;
-        }
-        
-        .category-title {
-            color: #10b981;
-            font-size: 14px;
-            font-weight: 600;
-            margin-bottom: 8px;
-            padding-bottom: 5px;
-            border-bottom: 1px solid #333;
-        }
-        
-        .category-buttons {
             display: flex;
             flex-direction: column;
-            gap: 5px;
-        }
-        
-        .category-btn {
-            background: transparent;
-            color: #ccc;
-            border: 1px solid #333;
-            border-radius: 5px;
-            padding: 8px 12px;
+            justify-content: center;
+            align-items: center;
+            gap: 3px;
             cursor: pointer;
-            font-size: 12px;
-            text-align: right;
-            transition: all 0.3s ease;
+            border: none;
+            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4);
         }
         
-        .category-btn:hover {
+        .hamburger-line {
+            width: 18px;
+            height: 2px;
+            background: white;
+            border-radius: 1px;
+        }
+        
+        /* منوی کشویی - کوچک شده */
+        .slide-menu {
+            position: fixed;
+            top: 0;
+            right: -280px;
+            width: 250px;
+            height: 100%;
+            background: #111;
+            z-index: 999;
+            transition: right 0.3s ease;
+            overflow-y: auto;
+            box-shadow: -3px 0 10px rgba(0, 0, 0, 0.5);
+            border-left: 1px solid #10b981;
+        }
+        
+        .slide-menu.active {
+            right: 0;
+        }
+        
+        .menu-header {
+            padding: 15px;
+            background: #000;
+            text-align: center;
+            border-bottom: 1px solid #10b981;
+        }
+        
+        .menu-title {
+            color: #10b981;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        
+        .menu-categories {
+            padding: 8px;
+        }
+        
+        .category-group {
+            margin-bottom: 15px;
+        }
+        
+        .group-title {
+            color: #888;
+            font-size: 12px;
+            padding: 8px 10px;
+            background: #1a1a1a;
+            border-radius: 4px;
+            margin-bottom: 5px;
+        }
+        
+        /* دکمه‌های منو - کوچک شده */
+        .menu-btn {
+            background: #1a1a1a;
+            border: none;
+            padding: 10px 12px;
+            color: #ccc;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: right;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+            border-radius: 4px;
+            margin-bottom: 3px;
+        }
+        
+        .menu-btn:hover {
             background: #10b981;
             color: white;
-            border-color: #10b981;
         }
         
-        /* منوی فایل‌ها */
-        .files-menu {
-            display: none;
+        .menu-icon {
+            font-size: 14px;
+            min-width: 20px;
+        }
+        
+        /* صفحه اصلی */
+        .main-screen {
             position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: #1a1a1a;
-            border: 2px solid #10b981;
-            border-radius: 10px;
-            padding: 20px;
-            width: 500px;
-            max-height: 70vh;
-            overflow-y: auto;
-            z-index: 1001;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            display: flex;
+            flex-direction: column;
         }
         
-        .files-header {
+        /* هدر - کوچک شده */
+        .header {
+            background: #111;
+            padding: 60px 15px 15px;
+            text-align: center;
+            border-bottom: 1px solid #10b981;
+        }
+        
+        .header h1 {
             color: #10b981;
             font-size: 18px;
-            font-weight: 600;
-            margin-bottom: 15px;
-            text-align: center;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #333;
+            margin-bottom: 3px;
         }
         
-        .files-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
+        .header p {
+            color: #888;
+            font-size: 11px;
         }
         
-        .file-btn {
-            background: transparent;
-            color: #ccc;
-            border: 1px solid #333;
-            border-radius: 5px;
-            padding: 8px 12px;
-            cursor: pointer;
-            font-size: 12px;
-            text-align: center;
-            transition: all 0.3s ease;
-        }
-        
-        .file-btn:hover {
-            background: #10b981;
-            color: white;
-            border-color: #10b981;
-        }
-        
-        .close-btn {
-            background: #dc2626;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            padding: 8px 15px;
-            cursor: pointer;
-            font-size: 12px;
-            margin-top: 15px;
-            width: 100%;
-        }
-        
-        .close-btn:hover {
-            background: #b91c1c;
-        }
-        
-        /* صفحه نمایش کد */
-        .code-display {
+        /* فضای بزرگ مرکزی - حداکثر فضای ممکن */
+        .code-display-area {
             flex: 1;
-            padding: 0;
-            background: #000;
             display: flex;
             justify-content: center;
             align-items: center;
+            padding: 15px;
             overflow: hidden;
         }
         
-        .code-content {
-            width: 99%;
-            height: 99%;
-            background: #000;
-            border: 2px solid #10b981;
-            border-radius: 8px;
-            padding: 25px;
-            font-family: 'Courier New', 'Monaco', 'Consolas', 'Roboto Mono', monospace;
-            font-size: 14px;
+        .welcome-message {
+            text-align: center;
+            color: #888;
+            max-width: 90%;
             line-height: 1.6;
+        }
+        
+        .welcome-title {
             color: #10b981;
+            font-size: 20px;
+            margin-bottom: 15px;
+        }
+        
+        .welcome-subtitle {
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+        
+        .instructions {
+            background: #1a1a1a;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #333;
+            text-align: right;
+            line-height: 1.8;
+            font-size: 13px;
+        }
+        
+        /* صفحه نمایش کد - فضای بسیار بزرگ */
+        .code-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            z-index: 2;
+            display: none;
+            flex-direction: column;
+        }
+        
+        .code-header {
+            background: #111;
+            padding: 10px 15px;
+            border-bottom: 1px solid #10b981;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            min-height: 50px;
+            flex-shrink: 0;
+        }
+        
+        .code-title {
+            color: #10b981;
+            font-size: 14px;
+            font-weight: 600;
+            flex: 1;
+            text-align: right;
+            padding-left: 15px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .code-controls {
+            display: flex;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+        
+        /* دکمه‌های کنترل - کوچک شده */
+        .control-btn {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 5px;
+            padding: 8px 12px;
+            color: white;
+            font-size: 11px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+        
+        .control-btn:hover {
+            background: #10b981;
+            border-color: #10b981;
+        }
+        
+        .control-btn.download {
+            background: #3b82f6;
+            border-color: #3b82f6;
+        }
+        
+        .control-btn.download:hover {
+            background: #2563eb;
+            border-color: #2563eb;
+        }
+        
+        .control-btn.back {
+            background: #dc2626;
+            border-color: #dc2626;
+        }
+        
+        .control-btn.back:hover {
+            background: #b91c1c;
+            border-color: #b91c1c;
+        }
+        
+        /* فضای کد - بسیار بزرگ شده */
+        .code-content-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #000;
+            padding: 0;
+            overflow: hidden;
+        }
+        
+        .code-content-wrapper {
+            flex: 1;
+            background: #0f172a;
+            margin: 10px;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #333;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .code-content {
+            flex: 1;
+            padding: 20px;
+            font-family: 'Courier New', 'Consolas', 'Monaco', monospace;
+            font-size: 15px;
+            line-height: 1.6;
+            color: #e2e8f0;
             white-space: pre;
-            overflow-x: auto;
-            overflow-y: auto;
+            overflow: auto;
             direction: ltr;
             text-align: left;
             tab-size: 4;
             word-wrap: normal;
-            word-break: keep-all;
             letter-spacing: 0.3px;
         }
         
-        .code-content pre {
-            margin: 0;
-            padding: 0;
-            font-family: inherit;
-            font-size: inherit;
-            direction: ltr;
-            text-align: left;
-            white-space: pre;
-        }
-        
-        .copy-btn {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: #10b981;
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 25px;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
-            z-index: 1000;
-        }
-        
-        .copy-btn:hover {
-            background: #0da271;
-        }
-        
-        .copy-btn.copied {
-            background: #059669;
-        }
-        
+        /* تایپینگ */
         .typing-cursor {
             display: inline-block;
-            width: 8px;
+            width: 7px;
             height: 18px;
             background: #10b981;
             margin-left: 2px;
-            animation: blink 1s infinite;
+            animation: blink 0.7s infinite;
             vertical-align: middle;
         }
         
@@ -255,652 +345,674 @@
             51%, 100% { opacity: 0; }
         }
         
-        .loading-message {
+        /* لودینگ */
+        .loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
             color: #10b981;
-            font-size: 18px;
+            gap: 15px;
             text-align: center;
-            font-weight: 600;
-            direction: ltr;
+        }
+        
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid transparent;
+            border-top: 3px solid #10b981;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* خطا */
+        .error {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #ef4444;
             text-align: center;
             padding: 20px;
+            gap: 15px;
         }
         
-        .code-content::-webkit-scrollbar {
-            width: 10px;
-            height: 10px;
+        .error-icon {
+            font-size: 36px;
         }
         
-        .code-content::-webkit-scrollbar-track {
+        /* اسکرول بار - نازک شده */
+        .code-content::-webkit-scrollbar,
+        .slide-menu::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .code-content::-webkit-scrollbar-track,
+        .slide-menu::-webkit-scrollbar-track {
             background: #1a1a1a;
-            border-radius: 5px;
         }
         
-        .code-content::-webkit-scrollbar-thumb {
+        .code-content::-webkit-scrollbar-thumb,
+        .slide-menu::-webkit-scrollbar-thumb {
             background: #10b981;
-            border-radius: 5px;
-            border: 2px solid #1a1a1a;
+            border-radius: 3px;
         }
         
-        .code-content::-webkit-scrollbar-thumb:hover {
-            background: #0da271;
-        }
-
+        /* موبایل */
         @media (max-width: 768px) {
-            .categories-menu {
-                width: 250px;
+            .slide-menu {
+                width: 85%;
+                right: -85%;
             }
             
-            .files-menu {
-                width: 90%;
-                max-width: 400px;
+            .code-header {
+                flex-direction: column;
+                gap: 10px;
+                padding: 10px;
             }
             
-            .files-grid {
-                grid-template-columns: 1fr;
+            .code-title {
+                text-align: center;
+                padding-left: 0;
+                order: 1;
+                font-size: 13px;
+            }
+            
+            .code-controls {
+                width: 100%;
+                justify-content: center;
+                order: 2;
+            }
+            
+            .control-btn {
+                flex: 1;
+                justify-content: center;
+                padding: 6px 8px;
+                font-size: 10px;
             }
             
             .code-content {
                 padding: 15px;
-                font-size: 12px;
+                font-size: 13px;
             }
             
-            .copy-btn {
-                padding: 10px 20px;
-                font-size: 14px;
+            .welcome-title {
+                font-size: 18px;
+            }
+            
+            .instructions {
+                padding: 12px;
+                font-size: 12px;
+            }
+        }
+        
+        /* جلوگیری از کلیک و کشیدن */
+        *:active {
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        /* نوتفیکیشن - کوچک شده */
+        .notification {
+            position: fixed;
+            top: 15px;
+            right: 15px;
+            background: #10b981;
+            color: white;
+            padding: 10px 18px;
+            border-radius: 6px;
+            z-index: 1001;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 3px 10px rgba(16, 185, 129, 0.3);
+            animation: slideIn 0.3s ease;
+            font-size: 13px;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        /* جلوگیری از انتخاب متن */
+        .code-content {
+            -webkit-user-select: text;
+            user-select: text;
+        }
+        
+        /* غیرفعال کردن زوم در موبایل */
+        @media (hover: none) and (pointer: coarse) {
+            * {
+                touch-action: none;
             }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <!-- منوی اصلی -->
-        <div class="main-menu">
-            <button class="main-menu-btn">📂 منوی اصلی</button>
-            <div class="categories-menu">
-                <!-- بخش اول: زبان‌های برنامه‌نویسی -->
-                <div class="category-section">
-                    <div class="category-title">💻 زبان‌های برنامه‌نویسی</div>
-                    <div class="category-buttons">
-                        <button class="category-btn" onclick="showFilesMenu('python')">🐍 پایتون</button>
-                        <button class="category-btn" onclick="showFilesMenu('javascript')">🟨 جاوااسکریپت</button>
-                        <button class="category-btn" onclick="showFilesMenu('java')">☕ جاوا</button>
-                        <button class="category-btn" onclick="showFilesMenu('csharp')">🔷 سی‌شارپ</button>
-                        <button class="category-btn" onclick="showFilesMenu('cpp')">🔶 سی‌پلاس</button>
-                        <button class="category-btn" onclick="showFilesMenu('php')">🔵 پی‌اچ‌پی</button>
-                        <button class="category-btn" onclick="showFilesMenu('go')">🔵 گو</button>
-                        <button class="category-btn" onclick="showFilesMenu('rust')">🦀 راست</button>
-                        <button class="category-btn" onclick="showFilesMenu('kotlin')">🔶 کاتلین</button>
-                        <button class="category-btn" onclick="showFilesMenu('swift')">🦢 سوئیفت</button>
-                    </div>
-                </div>
+    <!-- منوی همبرگری کوچک -->
+    <button class="hamburger-menu" onclick="toggleMenu()">
+        <div class="hamburger-line"></div>
+        <div class="hamburger-line"></div>
+        <div class="hamburger-line"></div>
+    </button>
+    
+    <!-- منوی کشویی -->
+    <div class="slide-menu" id="slideMenu">
+        <div class="menu-header">
+            <div class="menu-title">کدهای آماده</div>
+        </div>
+        
+        <div class="menu-categories">
+            <!-- بازی‌ها -->
+            <div class="category-group">
+                <div class="group-title">🎮 بازی‌ها</div>
+                <button class="menu-btn" onclick="loadFile('m1.txt')">
+                    <span class="menu-icon">🎮</span>
+                    <span>بازی دو بعدی</span>
+                </button>
+                <button class="menu-btn" onclick="loadFile('m2.txt')">
+                    <span class="menu-icon">🚀</span>
+                    <span>بازی گرافیک بالا</span>
+                </button>
+                <button class="menu-btn" onclick="loadFile('m3.txt')">
+                    <span class="menu-icon">⚔️</span>
+                    <span>بازی اکشنی</span>
+                </button>
+                <button class="menu-btn" onclick="loadFile('m4.txt')">
+                    <span class="menu-icon">🧩</span>
+                    <span>بازی پازلی</span>
+                </button>
+                <button class="menu-btn" onclick="loadFile('m5.txt')">
+                    <span class="menu-icon">🏎️</span>
+                    <span>بازی ماشینی</span>
+                </button>
+                <button class="menu-btn" onclick="loadFile('m6.txt')">
+                    <span class="menu-icon">🎯</span>
+                    <span>بازی جنگی</span>
+                </button>
+                <button class="menu-btn" onclick="loadFile('m7.txt')">
+                    <span class="menu-icon">👆</span>
+                    <span>بازی کلیکی</span>
+                </button>
+                <button class="menu-btn" onclick="loadFile('m8.txt')">
+                    <span class="menu-icon">🚀</span>
+                    <span>بازی سفینه</span>
+                </button>
+            </div>
+            
+            <!-- وب‌سایت‌ها -->
+            <div class="category-group">
+                <div class="group-title">🌐 سایت‌ها</div>
+                <button class="menu-btn" onclick="loadFile('m9.txt')">
+                    <span class="menu-icon">🛒</span>
+                    <span>سایت فروشگاهی</span>
+                </button>
+                <button class="menu-btn" onclick="loadFile('m10.txt')">
+                    <span class="menu-icon">📱</span>
+                    <span>چیدمان اپلیکیشنی</span>
+                </button>
+                <button class="menu-btn" onclick="loadFile('m11.txt')">
+                    <span class="menu-icon">🏪</span>
+                    <span>فروشگاه مدرن</span>
+                </button>
+                <button class="menu-btn" onclick="loadFile('m12.txt')">
+                    <span class="menu-icon">🌟</span>
+                    <span>سایت عالی</span>
+                </button>
+                <button class="menu-btn" onclick="loadFile('m13.txt')">
+                    <span class="menu-icon">🌐</span>
+                    <span>انواع سایت</span>
+                </button>
+            </div>
+            
+            <!-- ابزارها -->
+            <div class="category-group">
+                <div class="group-title">🛠️ ابزارها</div>
+                <button class="menu-btn" onclick="loadFile('m14.txt')">
+                    <span class="menu-icon">🎨</span>
+                    <span>طراحی UI</span>
+                </button>
+                <button class="menu-btn" onclick="loadFile('m15.txt')">
+                    <span class="menu-icon">📊</span>
+                    <span>داشبورد مدیریتی</span>
+                </button>
+                <button class="menu-btn" onclick="loadFile('m16.txt')">
+                    <span class="menu-icon">🔐</span>
+                    <span>سیستم لاگین</span>
+                </button>
+                <button class="menu-btn" onclick="loadFile('m17.txt')">
+                    <span class="menu-icon">💬</span>
+                    <span>چت آنلاین</span>
+                </button>
+                <button class="menu-btn" onclick="loadFile('m18.txt')">
+                    <span class="menu-icon">📝</span>
+                    <span>سیستم فرم</span>
+                </button>
+                <button class="menu-btn" onclick="loadFile('m19.txt')">
+                    <span class="menu-icon">📈</span>
+                    <span>آمار و نمودار</span>
+                </button>
+                <button class="menu-btn" onclick="loadFile('m20.txt')">
+                    <span class="menu-icon">🎯</span>
+                    <span>کدهای کاربردی</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- صفحه اصلی -->
+    <div class="main-screen" id="mainScreen">
+        <div class="header">
+            <h1>سیستم کدهای آماده</h1>
+            <p>۲۰ کد آماده در دسته‌های مختلف</p>
+        </div>
+        
+        <div class="code-display-area">
+            <div class="welcome-message">
+                <div class="welcome-title">👋 به سیستم خوش آمدید</div>
+                <div class="welcome-subtitle">کدهای آماده برای پروژه‌های مختلف</div>
                 
-                <!-- بخش دوم: فریمورک‌ها -->
-                <div class="category-section">
-                    <div class="category-title">⚡ فریمورک‌ها</div>
-                    <div class="category-buttons">
-                        <button class="category-btn" onclick="showFilesMenu('react')">⚛️ ری‌اکت</button>
-                        <button class="category-btn" onclick="showFilesMenu('vue')">🟩 وو</button>
-                        <button class="category-btn" onclick="showFilesMenu('angular')">🟥 انگولار</button>
-                        <button class="category-btn" onclick="showFilesMenu('node')">🟢 نود.جی‌اس</button>
-                        <button class="category-btn" onclick="showFilesMenu('laravel')">🔴 لاراول</button>
-                        <button class="category-btn" onclick="showFilesMenu('django')">🟢 جنگو</button>
-                        <button class="category-btn" onclick="showFilesMenu('flask')">🔵 فلاسک</button>
-                        <button class="category-btn" onclick="showFilesMenu('spring')">🟢 اسپرینگ</button>
-                        <button class="category-btn" onclick="showFilesMenu('flutter')">🔵 فلاتر</button>
-                        <button class="category-btn" onclick="showFilesMenu('react-native')">⚛️ ری‌اکت نیتیو</button>
-                    </div>
-                </div>
-                
-                <!-- بخش سوم: بازی‌سازی -->
-                <div class="category-section">
-                    <div class="category-title">🎮 بازی‌سازی</div>
-                    <div class="category-buttons">
-                        <button class="category-btn" onclick="showFilesMenu('unity')">🎯 یونیتی</button>
-                        <button class="category-btn" onclick="showFilesMenu('unreal')">🔥 آنریل</button>
-                        <button class="category-btn" onclick="showFilesMenu('godot')">🎲 گادوت</button>
-                        <button class="category-btn" onclick="showFilesMenu('pygame')">🐍 پای گیم</button>
-                        <button class="category-btn" onclick="showFilesMenu('phaser')">⚡ فیزر</button>
-                        <button class="category-btn" onclick="showFilesMenu('threejs')">🔺 Three.js</button>
-                        <button class="category-btn" onclick="showFilesMenu('canvas')">🎨 کینوس</button>
-                        <button class="category-btn" onclick="showFilesMenu('2d-games')">🟦 بازی‌های دو بعدی</button>
-                        <button class="category-btn" onclick="showFilesMenu('3d-games')">🟪 بازی‌های سه بعدی</button>
-                        <button class="category-btn" onclick="showFilesMenu('mobile-games')">📱 بازی موبایل</button>
-                    </div>
-                </div>
-                
-                <!-- بخش چهارم: توسعه وب -->
-                <div class="category-section">
-                    <div class="category-title">🌐 توسعه وب</div>
-                    <div class="category-buttons">
-                        <button class="category-btn" onclick="showFilesMenu('html-css')">🎯 HTML/CSS</button>
-                        <button class="category-btn" onclick="showFilesMenu('responsive')">📱 طراحی ریسپانسیو</button>
-                        <button class="category-btn" onclick="showFilesMenu('bootstrap')">🟦 بوت‌استرپ</button>
-                        <button class="category-btn" onclick="showFilesMenu('tailwind')">🟩 تیلویند</button>
-                        <button class="category-btn" onclick="showFilesMenu('sass')">🔴 ساس</button>
-                        <button class="category-btn" onclick="showFilesMenu('web-animation')">🎬 انیمیشن وب</button>
-                        <button class="category-btn" onclick="showFilesMenu('pwa')">📲 PWA</button>
-                        <button class="category-btn" onclick="showFilesMenu('seo')">🔍 سئو</button>
-                        <button class="category-btn" onclick="showFilesMenu('web-security')">🛡️ امنیت وب</button>
-                        <button class="category-btn" onclick="showFilesMenu('web-performance')">⚡ بهینه‌سازی</button>
-                    </div>
-                </div>
-                
-                <!-- بخش پنجم: هوش مصنوعی -->
-                <div class="category-section">
-                    <div class="category-title">🤖 هوش مصنوعی</div>
-                    <div class="category-buttons">
-                        <button class="category-btn" onclick="showFilesMenu('machine-learning')">🧠 یادگیری ماشین</button>
-                        <button class="category-btn" onclick="showFilesMenu('deep-learning')">🔮 یادگیری عمیق</button>
-                        <button class="category-btn" onclick="showFilesMenu('neural-networks')">🕸️ شبکه‌های عصبی</button>
-                        <button class="category-btn" onclick="showFilesMenu('computer-vision')">👁️ بینایی کامپیوتر</button>
-                        <button class="category-btn" onclick="showFilesMenu('nlp')">💬 پردازش زبان</button>
-                        <button class="category-btn" onclick="showFilesMenu('reinforcement')">🎯 یادگیری تقویتی</button>
-                        <button class="category-btn" onclick="showFilesMenu('tensorflow')">🔶 تنسورفلو</button>
-                        <button class="category-btn" onclick="showFilesMenu('pytorch')">🔥 پای‌تورچ</button>
-                        <button class="category-btn" onclick="showFilesMenu('opencv')">📷 OpenCV</button>
-                        <button class="category-btn" onclick="showFilesMenu('chatbots')">🤖 چت بات‌ها</button>
-                    </div>
-                </div>
-                
-                <!-- بخش ششم: دیتابیس -->
-                <div class="category-section">
-                    <div class="category-title">🗄️ دیتابیس</div>
-                    <div class="category-buttons">
-                        <button class="category-btn" onclick="showFilesMenu('mysql')">🐬 MySQL</button>
-                        <button class="category-btn" onclick="showFilesMenu('postgresql')">🐘 PostgreSQL</button>
-                        <button class="category-btn" onclick="showFilesMenu('mongodb')">🍃 MongoDB</button>
-                        <button class="category-btn" onclick="showFilesMenu('sqlite')">🔷 SQLite</button>
-                        <button class="category-btn" onclick="showFilesMenu('redis')">🔴 Redis</button>
-                        <button class="category-btn" onclick="showFilesMenu('oracle')">🔶 Oracle</button>
-                        <button class="category-btn" onclick="showFilesMenu('sql-server')">🔵 SQL Server</button>
-                        <button class="category-btn" onclick="showFilesMenu('firebase')">🔥 Firebase</button>
-                        <button class="category-btn" onclick="showFilesMenu('cassandra')">🔷 Cassandra</button>
-                        <button class="category-btn" onclick="showFilesMenu('elasticsearch')">⚡ Elasticsearch</button>
-                    </div>
-                </div>
-                
-                <!-- بخش هفتم: موبایل -->
-                <div class="category-section">
-                    <div class="category-title">📱 موبایل</div>
-                    <div class="category-buttons">
-                        <button class="category-btn" onclick="showFilesMenu('android')">🤖 اندروید</button>
-                        <button class="category-btn" onclick="showFilesMenu('ios')">🍎 iOS</button>
-                        <button class="category-btn" onclick="showFilesMenu('react-native')">⚛️ ری‌اکت نیتیو</button>
-                        <button class="category-btn" onclick="showFilesMenu('flutter')">🔵 فلاتر</button>
-                        <button class="category-btn" onclick="showFilesMenu('xamarin')">🔷 زامارین</button>
-                        <button class="category-btn" onclick="showFilesMenu('ionic')">🟪 آیونیک</button>
-                        <button class="category-btn" onclick="showFilesMenu('kotlin-mobile')">🔶 کاتلین</button>
-                        <button class="category-btn" onclick="showFilesMenu('swift-mobile')">🦢 سوئیفت</button>
-                        <button class="category-btn" onclick="showFilesMenu('mobile-ui')">🎨 UI موبایل</button>
-                        <button class="category-btn" onclick="showFilesMenu('mobile-api')">🔗 API موبایل</button>
-                    </div>
-                </div>
-                
-                <!-- بخش هشتم: دسکتاپ -->
-                <div class="category-section">
-                    <div class="category-title">💻 دسکتاپ</div>
-                    <div class="category-buttons">
-                        <button class="category-btn" onclick="showFilesMenu('csharp-desktop')">🔷 سی‌شارپ دسکتاپ</button>
-                        <button class="category-btn" onclick="showFilesMenu('java-desktop')">☕ جاوا دسکتاپ</button>
-                        <button class="category-btn" onclick="showFilesMenu('python-desktop')">🐍 پایتون دسکتاپ</button>
-                        <button class="category-btn" onclick="showFilesMenu('electron')">⚡ الکترون</button>
-                        <button class="category-btn" onclick="showFilesMenu('qt')">🔶 کیوت</button>
-                        <button class="category-btn" onclick="showFilesMenu('tkinter')">🐍 تیکینتر</button>
-                        <button class="category-btn" onclick="showFilesMenu('wpf')">🔷 WPF</button>
-                        <button class="category-btn" onclick="showFilesMenu('winforms')">🪟 WinForms</button>
-                        <button class="category-btn" onclick="showFilesMenu('console-apps')">⌨️ برنامه‌های کنسول</button>
-                        <button class="category-btn" onclick="showFilesMenu('gui-apps')">🎨 برنامه‌های GUI</button>
-                    </div>
+                <div class="instructions">
+                    <strong>📖 راهنمای استفاده:</strong><br>
+                    ۱. روی دکمه ☰ (سه خط) کلیک کنید<br>
+                    ۲. دسته مورد نظر را انتخاب کنید<br>
+                    ۳. کد به صورت خودکار بارگذاری و نمایش داده می‌شود<br>
+                    ۴. از دکمه‌های کپی و دانلود استفاده کنید<br>
+                    <br>
+                    <strong>⚡ ویژگی‌ها:</strong><br>
+                    • ۲۰ کد آماده مختلف<br>
+                    • فضای نمایش بزرگ کد<br>
+                    • امکان کپی و دانلود<br>
+                    • بدون زوم و حرکت صفحه
                 </div>
             </div>
         </div>
-        
-        <!-- منوی فایل‌ها -->
-        <div class="files-menu" id="filesMenu">
-            <div class="files-header" id="filesHeader">انتخاب فایل</div>
-            <div class="files-grid" id="filesGrid">
-                <!-- فایل‌ها اینجا نمایش داده می‌شوند -->
+    </div>
+    
+    <!-- صفحه نمایش کد -->
+    <div class="code-screen" id="codeScreen">
+        <div class="code-header">
+            <div class="code-title" id="codeTitle">در حال بارگذاری کد...</div>
+            <div class="code-controls">
+                <button class="control-btn download" onclick="downloadCode()" id="downloadBtn">
+                    ⬇️ دانلود
+                </button>
+                <button class="control-btn" onclick="copyCode()" id="copyBtn">
+                    📋 کپی
+                </button>
+                <button class="control-btn back" onclick="goBack()">
+                    ↩ بازگشت
+                </button>
             </div>
-            <button class="close-btn" onclick="closeFilesMenu()">بستن</button>
         </div>
-        
-        <!-- صفحه نمایش کد -->
-        <div class="code-display">
-            <div class="code-content" id="codeOutput">
-                {/* کد اینجا نمایش داده می‌شود */}
+        <div class="code-content-area">
+            <div class="code-content-wrapper">
+                <div class="code-content" id="codeContent">
+                    {/* کد اینجا نمایش داده می‌شود */}
+                </div>
             </div>
         </div>
-        
-        <!-- دکمه کپی -->
-        <button class="copy-btn" onclick="copyCode()" id="copyButton">کپی کد</button>
     </div>
 
     <script>
-        // نگاشت کامل دسته‌ها به فایل‌ها
-        const categoryFiles = {
-            // زبان‌های برنامه‌نویسی
-            'python': createFileList('پایتون', 1),
-            'javascript': createFileList('جاوااسکریپت', 11),
-            'java': createFileList('جاوا', 21),
-            'csharp': createFileList('سی‌شارپ', 31),
-            'cpp': createFileList('سی‌پلاس', 41),
-            'php': createFileList('پی‌اچ‌پی', 51),
-            'go': createFileList('گو', 61),
-            'rust': createFileList('راست', 71),
-            'kotlin': createFileList('کاتلین', 81),
-            'swift': createFileList('سوئیفت', 91),
-            
-            // فریمورک‌ها
-            'react': createFileList('ری‌اکت', 101),
-            'vue': createFileList('وو', 111),
-            'angular': createFileList('انگولار', 121),
-            'node': createFileList('نود.جی‌اس', 131),
-            'laravel': createFileList('لاراول', 141),
-            'django': createFileList('جنگو', 151),
-            'flask': createFileList('فلاسک', 161),
-            'spring': createFileList('اسپرینگ', 171),
-            'flutter': createFileList('فلاتر', 181),
-            'react-native': createFileList('ری‌اکت نیتیو', 191),
-            
-            // بازی‌سازی
-            'unity': createFileList('یونیتی', 201),
-            'unreal': createFileList('آنریل', 211),
-            'godot': createFileList('گادوت', 221),
-            'pygame': createFileList('پای گیم', 231),
-            'phaser': createFileList('فیزر', 241),
-            'threejs': createFileList('Three.js', 251),
-            'canvas': createFileList('کینوس', 261),
-            '2d-games': createFileList('بازی دو بعدی', 271),
-            '3d-games': createFileList('بازی سه بعدی', 281),
-            'mobile-games': createFileList('بازی موبایل', 291),
-            
-            // توسعه وب
-            'html-css': createFileList('HTML/CSS', 301),
-            'responsive': createFileList('طراحی ریسپانسیو', 311),
-            'bootstrap': createFileList('بوت‌استرپ', 321),
-            'tailwind': createFileList('تیلویند', 331),
-            'sass': createFileList('ساس', 341),
-            'web-animation': createFileList('انیمیشن وب', 351),
-            'pwa': createFileList('PWA', 361),
-            'seo': createFileList('سئو', 371),
-            'web-security': createFileList('امنیت وب', 381),
-            'web-performance': createFileList('بهینه‌سازی وب', 391),
-            
-            // هوش مصنوعی
-            'machine-learning': createFileList('یادگیری ماشین', 401),
-            'deep-learning': createFileList('یادگیری عمیق', 411),
-            'neural-networks': createFileList('شبکه عصبی', 421),
-            'computer-vision': createFileList('بینایی کامپیوتر', 431),
-            'nlp': createFileList('پردازش زبان', 441),
-            'reinforcement': createFileList('یادگیری تقویتی', 451),
-            'tensorflow': createFileList('تنسورفلو', 461),
-            'pytorch': createFileList('پای‌تورچ', 471),
-            'opencv': createFileList('OpenCV', 481),
-            'chatbots': createFileList('چت بات', 491),
-            
-            // دیتابیس
-            'mysql': createFileList('MySQL', 501),
-            'postgresql': createFileList('PostgreSQL', 511),
-            'mongodb': createFileList('MongoDB', 521),
-            'sqlite': createFileList('SQLite', 531),
-            'redis': createFileList('Redis', 541),
-            'oracle': createFileList('Oracle', 551),
-            'sql-server': createFileList('SQL Server', 561),
-            'firebase': createFileList('Firebase', 571),
-            'cassandra': createFileList('Cassandra', 581),
-            'elasticsearch': createFileList('Elasticsearch', 591),
-            
-            // موبایل
-            'android': createFileList('اندروید', 601),
-            'ios': createFileList('iOS', 611),
-            'react-native': createFileList('ری‌اکت نیتیو', 621),
-            'flutter': createFileList('فلاتر', 631),
-            'xamarin': createFileList('زامارین', 641),
-            'ionic': createFileList('آیونیک', 651),
-            'kotlin-mobile': createFileList('کاتلین موبایل', 661),
-            'swift-mobile': createFileList('سوئیفت موبایل', 671),
-            'mobile-ui': createFileList('UI موبایل', 681),
-            'mobile-api': createFileList('API موبایل', 691),
-            
-            // دسکتاپ
-            'csharp-desktop': createFileList('سی‌شارپ دسکتاپ', 701),
-            'java-desktop': createFileList('جاوا دسکتاپ', 711),
-            'python-desktop': createFileList('پایتون دسکتاپ', 721),
-            'electron': createFileList('الکترون', 731),
-            'qt': createFileList('کیوت', 741),
-            'tkinter': createFileList('تیکینتر', 751),
-            'wpf': createFileList('WPF', 761),
-            'winforms': createFileList('WinForms', 771),
-            'console-apps': createFileList('برنامه کنسول', 781),
-            'gui-apps': createFileList('برنامه GUI', 791)
-        };
-
-        // تابع کمکی برای ایجاد لیست فایل‌ها
-        function createFileList(categoryName, startIndex) {
-            const files = [];
-            for (let i = 0; i < 20; i++) {
-                files.push({
-                    name: `${categoryName} - فایل ${i + 1}`,
-                    file: `m${startIndex + i}.txt`
-                });
-            }
-            return files;
-        }
-
-        const categoryTitles = {
-            // زبان‌ها
-            'python': '🐍 پایتون',
-            'javascript': '🟨 جاوااسکریپت',
-            'java': '☕ جاوا',
-            'csharp': '🔷 سی‌شارپ',
-            'cpp': '🔶 سی‌پلاس',
-            'php': '🔵 پی‌اچ‌پی',
-            'go': '🔵 گو',
-            'rust': '🦀 راست',
-            'kotlin': '🔶 کاتلین',
-            'swift': '🦢 سوئیفت',
-            
-            // فریمورک‌ها
-            'react': '⚛️ ری‌اکت',
-            'vue': '🟩 وو',
-            'angular': '🟥 انگولار',
-            'node': '🟢 نود.جی‌اس',
-            'laravel': '🔴 لاراول',
-            'django': '🟢 جنگو',
-            'flask': '🔵 فلاسک',
-            'spring': '🟢 اسپرینگ',
-            'flutter': '🔵 فلاتر',
-            'react-native': '⚛️ ری‌اکت نیتیو',
-            
-            // بازی‌سازی
-            'unity': '🎯 یونیتی',
-            'unreal': '🔥 آنریل',
-            'godot': '🎲 گادوت',
-            'pygame': '🐍 پای گیم',
-            'phaser': '⚡ فیزر',
-            'threejs': '🔺 Three.js',
-            'canvas': '🎨 کینوس',
-            '2d-games': '🟦 بازی‌های دو بعدی',
-            '3d-games': '🟪 بازی‌های سه بعدی',
-            'mobile-games': '📱 بازی موبایل',
-            
-            // توسعه وب
-            'html-css': '🎯 HTML/CSS',
-            'responsive': '📱 طراحی ریسپانسیو',
-            'bootstrap': '🟦 بوت‌استرپ',
-            'tailwind': '🟩 تیلویند',
-            'sass': '🔴 ساس',
-            'web-animation': '🎬 انیمیشن وب',
-            'pwa': '📲 PWA',
-            'seo': '🔍 سئو',
-            'web-security': '🛡️ امنیت وب',
-            'web-performance': '⚡ بهینه‌سازی',
-            
-            // هوش مصنوعی
-            'machine-learning': '🧠 یادگیری ماشین',
-            'deep-learning': '🔮 یادگیری عمیق',
-            'neural-networks': '🕸️ شبکه‌های عصبی',
-            'computer-vision': '👁️ بینایی کامپیوتر',
-            'nlp': '💬 پردازش زبان',
-            'reinforcement': '🎯 یادگیری تقویتی',
-            'tensorflow': '🔶 تنسورفلو',
-            'pytorch': '🔥 پای‌تورچ',
-            'opencv': '📷 OpenCV',
-            'chatbots': '🤖 چت بات‌ها',
-            
-            // دیتابیس
-            'mysql': '🐬 MySQL',
-            'postgresql': '🐘 PostgreSQL',
-            'mongodb': '🍃 MongoDB',
-            'sqlite': '🔷 SQLite',
-            'redis': '🔴 Redis',
-            'oracle': '🔶 Oracle',
-            'sql-server': '🔵 SQL Server',
-            'firebase': '🔥 Firebase',
-            'cassandra': '🔷 Cassandra',
-            'elasticsearch': '⚡ Elasticsearch',
-            
-            // موبایل
-            'android': '🤖 اندروید',
-            'ios': '🍎 iOS',
-            'react-native': '⚛️ ری‌اکت نیتیو',
-            'flutter': '🔵 فلاتر',
-            'xamarin': '🔷 زامارین',
-            'ionic': '🟪 آیونیک',
-            'kotlin-mobile': '🔶 کاتلین',
-            'swift-mobile': '🦢 سوئیفت',
-            'mobile-ui': '🎨 UI موبایل',
-            'mobile-api': '🔗 API موبایل',
-            
-            // دسکتاپ
-            'csharp-desktop': '🔷 سی‌شارپ دسکتاپ',
-            'java-desktop': '☕ جاوا دسکتاپ',
-            'python-desktop': '🐍 پایتون دسکتاپ',
-            'electron': '⚡ الکترون',
-            'qt': '🔶 کیوت',
-            'tkinter': '🐍 تیکینتر',
-            'wpf': '🔷 WPF',
-            'winforms': '🪟 WinForms',
-            'console-apps': '⌨️ برنامه‌های کنسول',
-            'gui-apps': '🎨 برنامه‌های GUI'
-        };
-
+        // متغیرهای سراسری
         let isTyping = false;
+        let typingInterval = null;
+        let currentFileName = '';
         let currentContent = '';
-
-        // نمایش منوی فایل‌ها
-        function showFilesMenu(category) {
-            const files = categoryFiles[category] || [];
-            const title = categoryTitles[category] || 'انتخاب فایل';
+        let isMenuOpen = false;
+        
+        // نام دسته‌ها برای نمایش
+        const categoryNames = {
+            'm1.txt': '🎮 بازی دو بعدی',
+            'm2.txt': '🚀 بازی گرافیک بالا',
+            'm3.txt': '⚔️ بازی اکشنی',
+            'm4.txt': '🧩 بازی پازلی',
+            'm5.txt': '🏎️ بازی ماشینی',
+            'm6.txt': '🎯 بازی جنگی',
+            'm7.txt': '👆 بازی کلیکی',
+            'm8.txt': '🚀 بازی سفینه',
+            'm9.txt': '🛒 سایت فروشگاهی',
+            'm10.txt': '📱 چیدمان اپلیکیشنی',
+            'm11.txt': '🏪 فروشگاه مدرن',
+            'm12.txt': '🌟 سایت عالی',
+            'm13.txt': '🌐 انواع سایت',
+            'm14.txt': '🎨 طراحی UI',
+            'm15.txt': '📊 داشبورد مدیریتی',
+            'm16.txt': '🔐 سیستم لاگین',
+            'm17.txt': '💬 چت آنلاین',
+            'm18.txt': '📝 سیستم فرم',
+            'm19.txt': '📈 آمار و نمودار',
+            'm20.txt': '🎯 کدهای کاربردی'
+        };
+        
+        // تابع toggle منو
+        function toggleMenu() {
+            const slideMenu = document.getElementById('slideMenu');
+            isMenuOpen = !isMenuOpen;
             
-            if (files.length === 0) {
-                alert('❌ فایلی برای این دسته تعریف نشده است');
-                return;
+            if (isMenuOpen) {
+                slideMenu.classList.add('active');
+            } else {
+                slideMenu.classList.remove('active');
+            }
+        }
+        
+        // بستن منو با کلیک خارج
+        document.addEventListener('click', function(event) {
+            const slideMenu = document.getElementById('slideMenu');
+            const hamburgerMenu = document.querySelector('.hamburger-menu');
+            
+            if (isMenuOpen && !slideMenu.contains(event.target) && !hamburgerMenu.contains(event.target)) {
+                slideMenu.classList.remove('active');
+                isMenuOpen = false;
+            }
+        });
+        
+        // تابع بارگذاری فایل
+        async function loadFile(fileName) {
+            if (isTyping) {
+                cancelTyping();
+                await new Promise(resolve => setTimeout(resolve, 100));
             }
             
-            const filesMenu = document.getElementById('filesMenu');
-            const filesHeader = document.getElementById('filesHeader');
-            const filesGrid = document.getElementById('filesGrid');
+            currentFileName = fileName;
+            isTyping = true;
             
-            filesHeader.textContent = title;
-            filesGrid.innerHTML = '';
+            // بستن منو
+            toggleMenu();
             
-            // ایجاد دکمه‌های فایل
-            files.forEach(item => {
-                const button = document.createElement('button');
-                button.className = 'file-btn';
-                button.textContent = item.name;
-                button.onclick = () => {
-                    closeFilesMenu();
-                    loadFile(item.file);
-                };
-                filesGrid.appendChild(button);
-            });
+            // نمایش صفحه کد
+            document.getElementById('mainScreen').style.display = 'none';
+            document.getElementById('codeScreen').style.display = 'flex';
             
-            filesMenu.style.display = 'block';
-        }
-
-        // بستن منوی فایل‌ها
-        function closeFilesMenu() {
-            document.getElementById('filesMenu').style.display = 'none';
-        }
-
-        // تابع لود فایل
-        async function loadFile(fileName) {
-            if (isTyping) return;
+            // نمایش عنوان
+            document.getElementById('codeTitle').textContent = categoryNames[fileName] || 'بارگذاری کد';
             
-            const codeOutput = document.getElementById('codeOutput');
-            codeOutput.innerHTML = '<div class="loading-message">⏳ در حال تولید کد... لطفاً منتظر بمانید</div>';
-            codeOutput.style.direction = 'ltr';
-            codeOutput.style.textAlign = 'center';
-            
-            // تاخیر برای نمایش پیام منتظر بمانید
-            await new Promise(resolve => setTimeout(resolve, 1500));
+            // نمایش حالت لودینگ
+            const codeContent = document.getElementById('codeContent');
+            codeContent.innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <div>در حال بارگذاری کد...</div>
+                </div>
+            `;
             
             try {
+                // تلاش برای بارگذاری فایل از مسیر
                 const response = await fetch(fileName);
                 
                 if (response.ok) {
-                    const content = await response.text();
-                    currentContent = content;
+                    const text = await response.text();
                     
-                    // شروع تایپ کردن
-                    typeContent(content, codeOutput);
+                    if (text.trim() === '') {
+                        throw new Error('فایل خالی است');
+                    }
+                    
+                    currentContent = text;
+                    typeCode(text);
                     
                 } else {
-                    showMessage(`❌ فایل ${fileName} یافت نشد\n\nبرای تست سیستم:\n1. فایل ${fileName} را ایجاد کنید\n2. کدهای مورد نظر را در آن قرار دهید\n3. دوباره امتحان کنید`);
+                    throw new Error('فایل یافت نشد');
                 }
+                
             } catch (error) {
-                showMessage(`❌ خطا در بارگذاری فایل\n\n${error.message}`);
+                // اگر فایل پیدا نشد
+                showError(`فایل "${fileName}" در سرور یافت نشد<br><br>
+                          لطفاً مطمئن شوید فایل در مسیر صحیح قرار دارد`);
+                isTyping = false;
             }
         }
-
-        // تابع تایپ کردن محتوا
-        function typeContent(content, element) {
-            isTyping = true;
-            let i = 0;
-            element.innerHTML = '';
+        
+        // تابع تایپ کد
+        function typeCode(code) {
+            const codeContent = document.getElementById('codeContent');
+            codeContent.innerHTML = '';
             
-            // تنظیم جهت متن به LTR برای تایپ کد انگلیسی
-            element.style.direction = 'ltr';
-            element.style.textAlign = 'left';
+            let i = 0;
+            const typingSpeed = 1; // خیلی سریع
             
             function typeChar() {
-                if (i < content.length) {
-                    // اضافه کردن کاراکتر جدید
-                    const typedText = content.substring(0, i + 1);
-                    element.textContent = typedText + ' ';
+                if (i < code.length) {
+                    codeContent.textContent = code.substring(0, i + 1);
                     
-                    // ایجاد نشانگر چشمک زن
+                    // نشانگر چشمک‌زن
                     const cursor = document.createElement('span');
                     cursor.className = 'typing-cursor';
-                    element.appendChild(cursor);
+                    codeContent.appendChild(cursor);
                     
                     // اسکرول به پایین
-                    element.scrollTop = element.scrollHeight;
+                    codeContent.scrollTop = codeContent.scrollHeight;
                     
                     i++;
-                    
-                    // سرعت تایپ متغیر برای طبیعی‌تر شدن
-                    const randomSpeed = Math.random() * 15 + 10; // 10-25ms
-                    setTimeout(typeChar, randomSpeed);
+                    typingInterval = setTimeout(typeChar, typingSpeed);
                 } else {
                     // پایان تایپ
-                    element.innerHTML = formatCode(content);
                     isTyping = false;
                 }
             }
             
             typeChar();
         }
-
-        // قالب‌بندی کد برای نمایش نهایی
-        function formatCode(content) {
-            // جایگزینی کاراکترهای خاص HTML
-            let formatted = content
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;')
-                .replace(/'/g, '&#39;');
-            
-            // بازگرداندن به صورت کد با تگ pre
-            return `<pre>${formatted}</pre>`;
+        
+        // لغو تایپ
+        function cancelTyping() {
+            if (typingInterval) {
+                clearTimeout(typingInterval);
+            }
+            isTyping = false;
         }
-
-        // نمایش پیام
-        function showMessage(message) {
-            const codeOutput = document.getElementById('codeOutput');
-            codeOutput.style.direction = 'ltr';
-            codeOutput.style.textAlign = 'left';
-            codeOutput.textContent = message;
+        
+        // نمایش خطا
+        function showError(message) {
+            const codeContent = document.getElementById('codeContent');
+            codeContent.innerHTML = `
+                <div class="error">
+                    <div class="error-icon">❌</div>
+                    <div style="font-size: 16px; font-weight: bold; margin-bottom: 10px;">خطا در بارگذاری</div>
+                    <div style="font-size: 13px; color: #888; line-height: 1.6; max-width: 400px;">
+                        ${message}
+                    </div>
+                    <button onclick="goBack()" style="margin-top: 20px; padding: 8px 16px; background: #dc2626; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 12px;">
+                        بازگشت به صفحه اصلی
+                    </button>
+                </div>
+            `;
         }
-
-        // تابع کپی کردن کد
+        
+        // بازگشت به صفحه اصلی
+        function goBack() {
+            cancelTyping();
+            document.getElementById('codeScreen').style.display = 'none';
+            document.getElementById('mainScreen').style.display = 'flex';
+            document.getElementById('codeTitle').textContent = 'در حال بارگذاری...';
+            document.getElementById('codeContent').innerHTML = '';
+        }
+        
+        // کپی کد
         function copyCode() {
-            const codeOutput = document.getElementById('codeOutput');
-            const copyButton = document.getElementById('copyButton');
+            let code = currentContent;
             
-            // اگر در حال تایپ هستیم، محتوای کامل را کپی کن
-            const code = isTyping ? currentContent : 
-                        codeOutput.textContent || codeOutput.innerText;
-            
-            navigator.clipboard.writeText(code).then(() => {
-                const originalText = copyButton.textContent;
-                copyButton.textContent = '✅ کپی شد!';
-                copyButton.classList.add('copied');
+            if (!code || code.trim() === '') {
+                const codeContent = document.getElementById('codeContent');
+                code = codeContent.textContent || codeContent.innerText || '';
                 
-                setTimeout(() => {
-                    copyButton.textContent = originalText;
-                    copyButton.classList.remove('copied');
-                }, 2000);
-                
-            }).catch(err => {
-                copyButton.textContent = '❌ خطا در کپی!';
-                setTimeout(() => {
-                    copyButton.textContent = 'کپی کد';
-                }, 2000);
-            });
-        }
-
-        // بستن منو وقتی کلیک خارج از آن انجام می‌شود
-        document.addEventListener('click', function(event) {
-            const mainMenu = document.querySelector('.main-menu');
-            const filesMenu = document.getElementById('filesMenu');
-            
-            if (!mainMenu.contains(event.target)) {
-                document.querySelector('.categories-menu').style.display = 'none';
+                // حذف نشانگر چشمک‌زن
+                code = code.replace(/\u2589/g, '').replace(/█/g, '').trim();
             }
             
-            if (filesMenu.style.display === 'block' && !filesMenu.contains(event.target) && 
-                !event.target.classList.contains('category-btn')) {
-                filesMenu.style.display = 'none';
+            if (!code || code.trim() === '') {
+                showNotification('⚠️ کدی برای کپی کردن وجود ندارد', 'warning');
+                return;
+            }
+            
+            // روش Clipboard API
+            navigator.clipboard.writeText(code)
+                .then(() => {
+                    showNotification('✅ کد با موفقیت کپی شد');
+                    
+                    // تغییر موقت دکمه
+                    const copyBtn = document.getElementById('copyBtn');
+                    const originalText = copyBtn.innerHTML;
+                    copyBtn.innerHTML = '✅ کپی شد!';
+                    
+                    setTimeout(() => {
+                        copyBtn.innerHTML = originalText;
+                    }, 2000);
+                })
+                .catch(() => {
+                    // روش fallback
+                    const textarea = document.createElement('textarea');
+                    textarea.value = code;
+                    textarea.style.position = 'fixed';
+                    textarea.style.opacity = '0';
+                    document.body.appendChild(textarea);
+                    
+                    textarea.select();
+                    textarea.setSelectionRange(0, 99999);
+                    
+                    try {
+                        document.execCommand('copy');
+                        showNotification('✅ کد با موفقیت کپی شد');
+                        
+                        // تغییر موقت دکمه
+                        const copyBtn = document.getElementById('copyBtn');
+                        const originalText = copyBtn.innerHTML;
+                        copyBtn.innerHTML = '✅ کپی شد!';
+                        
+                        setTimeout(() => {
+                            copyBtn.innerHTML = originalText;
+                        }, 2000);
+                    } catch (err) {
+                        showNotification('❌ خطا در کپی کردن کد', 'error');
+                    }
+                    
+                    document.body.removeChild(textarea);
+                });
+        }
+        
+        // دانلود کد
+        function downloadCode() {
+            let code = currentContent;
+            
+            if (!code || code.trim() === '') {
+                const codeContent = document.getElementById('codeContent');
+                code = codeContent.textContent || codeContent.innerText || '';
+                
+                // حذف نشانگر چشمک‌زن
+                code = code.replace(/\u2589/g, '').replace(/█/g, '').trim();
+            }
+            
+            if (!code || code.trim() === '') {
+                showNotification('⚠️ کدی برای دانلود وجود ندارد', 'warning');
+                return;
+            }
+            
+            let filename = currentFileName || 'code.txt';
+            
+            // ایجاد Blob و دانلود
+            const blob = new Blob([code], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            
+            a.href = url;
+            a.download = filename;
+            a.style.display = 'none';
+            
+            document.body.appendChild(a);
+            a.click();
+            
+            // تمیزکاری
+            setTimeout(() => {
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                showNotification(`✅ فایل "${filename}" دانلود شد`);
+            }, 100);
+        }
+        
+        // نمایش نوتفیکیشن
+        function showNotification(message, type = 'success') {
+            const oldNotification = document.querySelector('.notification');
+            if (oldNotification) {
+                oldNotification.remove();
+            }
+            
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            notification.innerHTML = message;
+            
+            if (type === 'error') {
+                notification.style.background = '#dc2626';
+            } else if (type === 'warning') {
+                notification.style.background = '#f59e0b';
+            }
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.remove();
+                }
+            }, 3000);
+        }
+        
+        // جلوگیری کامل از زوم و حرکت صفحه
+        document.addEventListener('keydown', function(e) {
+            if ((e.ctrlKey || e.metaKey) && 
+                (e.key === '+' || e.key === '-' || e.key === '0' || 
+                 e.key === '=' || e.keyCode === 187 || e.keyCode === 189)) {
+                e.preventDefault();
+                return false;
             }
         });
-
-        // لود اولیه
+        
+        document.addEventListener('wheel', function(e) {
+            if (e.ctrlKey) {
+                e.preventDefault();
+                return false;
+            }
+        }, { passive: false });
+        
+        // جلوگیری از کشیدن و حرکت صفحه
+        document.addEventListener('touchmove', function(e) {
+            if (e.touches.length > 1) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+        
+        document.addEventListener('gesturestart', function(e) {
+            e.preventDefault();
+        });
+        
+        // جلوگیری از رفتن به عقب
+        history.pushState(null, null, location.href);
+        window.onpopstate = function(event) {
+            history.go(1);
+        };
+        
+        // بارگذاری اولیه
         window.addEventListener('load', function() {
-            const codeOutput = document.getElementById('codeOutput');
-            codeOutput.style.direction = 'ltr';
-            codeOutput.style.textAlign = 'left';
-            codeOutput.innerHTML = `<pre>
-# Welcome to Ready Code System! 👋
-
-## How to use:
-
-📂 Click on main menu
-🎯 Select a category
-📄 Choose a file
-⌨️ Code will be typed automatically
-📋 Use copy button
-
-## Sample Python Code:
-
-def hello_world():
-    print("Hello, World!")
-    return "Success"
-
-class Example:
-    def __init__(self, name):
-        self.name = name
-    
-    def greet(self):
-        return f"Hello, {self.name}"
-
-## Sample JavaScript Code:
-
-function calculateSum(a, b) {
-    return a + b;
-}
-
-const user = {
-    name: "John",
-    age: 30,
-    email: "john@example.com"
-};
-
-console.log("System is ready!");
-            </pre>`;
+            document.getElementById('mainScreen').style.display = 'flex';
+            document.getElementById('codeScreen').style.display = 'none';
+            
+            // جلوگیری از کلیک راست
+            document.addEventListener('contextmenu', function(e) {
+                e.preventDefault();
+                return false;
+            });
         });
     </script>
 </body>
