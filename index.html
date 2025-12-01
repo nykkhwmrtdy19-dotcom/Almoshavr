@@ -190,14 +190,29 @@
             border: 2px solid #10b981;
             border-radius: 8px;
             padding: 25px;
-            font-family: 'Courier New', monospace;
+            font-family: 'Courier New', 'Monaco', 'Consolas', 'Roboto Mono', monospace;
             font-size: 14px;
-            line-height: 1.4;
+            line-height: 1.6;
             color: #10b981;
-            white-space: pre-wrap;
+            white-space: pre;
+            overflow-x: auto;
             overflow-y: auto;
             direction: ltr;
             text-align: left;
+            tab-size: 4;
+            word-wrap: normal;
+            word-break: keep-all;
+            letter-spacing: 0.3px;
+        }
+        
+        .code-content pre {
+            margin: 0;
+            padding: 0;
+            font-family: inherit;
+            font-size: inherit;
+            direction: ltr;
+            text-align: left;
+            white-space: pre;
         }
         
         .copy-btn {
@@ -232,6 +247,7 @@
             background: #10b981;
             margin-left: 2px;
             animation: blink 1s infinite;
+            vertical-align: middle;
         }
         
         @keyframes blink {
@@ -244,19 +260,29 @@
             font-size: 18px;
             text-align: center;
             font-weight: 600;
+            direction: ltr;
+            text-align: center;
+            padding: 20px;
         }
         
         .code-content::-webkit-scrollbar {
-            width: 8px;
+            width: 10px;
+            height: 10px;
         }
         
         .code-content::-webkit-scrollbar-track {
             background: #1a1a1a;
+            border-radius: 5px;
         }
         
         .code-content::-webkit-scrollbar-thumb {
             background: #10b981;
-            border-radius: 4px;
+            border-radius: 5px;
+            border: 2px solid #1a1a1a;
+        }
+        
+        .code-content::-webkit-scrollbar-thumb:hover {
+            background: #0da271;
         }
 
         @media (max-width: 768px) {
@@ -705,6 +731,8 @@
             
             const codeOutput = document.getElementById('codeOutput');
             codeOutput.innerHTML = '<div class="loading-message">⏳ در حال تولید کد... لطفاً منتظر بمانید</div>';
+            codeOutput.style.direction = 'ltr';
+            codeOutput.style.textAlign = 'center';
             
             // تاخیر برای نمایش پیام منتظر بمانید
             await new Promise(resolve => setTimeout(resolve, 1500));
@@ -733,22 +761,32 @@
             let i = 0;
             element.innerHTML = '';
             
+            // تنظیم جهت متن به LTR برای تایپ کد انگلیسی
+            element.style.direction = 'ltr';
+            element.style.textAlign = 'left';
+            
             function typeChar() {
                 if (i < content.length) {
                     // اضافه کردن کاراکتر جدید
-                    element.innerHTML = content.substring(0, i + 1) + '<span class="typing-cursor"></span>';
+                    const typedText = content.substring(0, i + 1);
+                    element.textContent = typedText + ' ';
+                    
+                    // ایجاد نشانگر چشمک زن
+                    const cursor = document.createElement('span');
+                    cursor.className = 'typing-cursor';
+                    element.appendChild(cursor);
                     
                     // اسکرول به پایین
                     element.scrollTop = element.scrollHeight;
                     
                     i++;
                     
-                    // سرعت تایپ تصادفی برای طبیعی‌تر شدن
-                    const randomSpeed = Math.random() * 10 + 20;
+                    // سرعت تایپ متغیر برای طبیعی‌تر شدن
+                    const randomSpeed = Math.random() * 15 + 10; // 10-25ms
                     setTimeout(typeChar, randomSpeed);
                 } else {
                     // پایان تایپ
-                    element.innerHTML = content;
+                    element.innerHTML = formatCode(content);
                     isTyping = false;
                 }
             }
@@ -756,9 +794,25 @@
             typeChar();
         }
 
+        // قالب‌بندی کد برای نمایش نهایی
+        function formatCode(content) {
+            // جایگزینی کاراکترهای خاص HTML
+            let formatted = content
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+            
+            // بازگرداندن به صورت کد با تگ pre
+            return `<pre>${formatted}</pre>`;
+        }
+
         // نمایش پیام
         function showMessage(message) {
             const codeOutput = document.getElementById('codeOutput');
+            codeOutput.style.direction = 'ltr';
+            codeOutput.style.textAlign = 'left';
             codeOutput.textContent = message;
         }
 
@@ -768,7 +822,8 @@
             const copyButton = document.getElementById('copyButton');
             
             // اگر در حال تایپ هستیم، محتوای کامل را کپی کن
-            const code = isTyping ? currentContent : codeOutput.textContent;
+            const code = isTyping ? currentContent : 
+                        codeOutput.textContent || codeOutput.innerText;
             
             navigator.clipboard.writeText(code).then(() => {
                 const originalText = copyButton.textContent;
@@ -797,7 +852,8 @@
                 document.querySelector('.categories-menu').style.display = 'none';
             }
             
-            if (!filesMenu.contains(event.target) && event.target.className !== 'category-btn') {
+            if (filesMenu.style.display === 'block' && !filesMenu.contains(event.target) && 
+                !event.target.classList.contains('category-btn')) {
                 filesMenu.style.display = 'none';
             }
         });
@@ -805,7 +861,46 @@
         // لود اولیه
         window.addEventListener('load', function() {
             const codeOutput = document.getElementById('codeOutput');
-            codeOutput.textContent = '👋 به سیستم کدهای آماده خوش آمدید!\n\n📂 روی منوی اصلی کلیک کنید\n🎯 یک دسته را انتخاب کنید\n📄 فایل مورد نظر را انتخاب کنید\n⌨️ کد به صورت خودکار تایپ می‌شود\n📋 از دکمه کپی استفاده کنید';
+            codeOutput.style.direction = 'ltr';
+            codeOutput.style.textAlign = 'left';
+            codeOutput.innerHTML = `<pre>
+# Welcome to Ready Code System! 👋
+
+## How to use:
+
+📂 Click on main menu
+🎯 Select a category
+📄 Choose a file
+⌨️ Code will be typed automatically
+📋 Use copy button
+
+## Sample Python Code:
+
+def hello_world():
+    print("Hello, World!")
+    return "Success"
+
+class Example:
+    def __init__(self, name):
+        self.name = name
+    
+    def greet(self):
+        return f"Hello, {self.name}"
+
+## Sample JavaScript Code:
+
+function calculateSum(a, b) {
+    return a + b;
+}
+
+const user = {
+    name: "John",
+    age: 30,
+    email: "john@example.com"
+};
+
+console.log("System is ready!");
+            </pre>`;
         });
     </script>
 </body>
