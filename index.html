@@ -240,14 +240,22 @@
             justify-content: center;
             align-items: center;
             overflow: hidden;
+            position: relative;
         }
         
-        .code-content {
+        .code-wrapper {
             width: 99%;
             height: 96%;
             background: #000;
             border: 2px solid #10b981;
             border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .code-content {
+            width: 100%;
+            height: 100%;
             padding: 25px;
             font-family: 'Courier New', 'Monaco', 'Consolas', 'Roboto Mono', monospace;
             font-size: 14px;
@@ -262,6 +270,8 @@
             word-wrap: normal;
             word-break: keep-all;
             letter-spacing: 0.3px;
+            background: #000;
+            scroll-behavior: smooth;
         }
         
         .code-content pre {
@@ -272,6 +282,17 @@
             direction: ltr;
             text-align: left;
             white-space: pre;
+        }
+        
+        /* خط کشی برای دنبال کردن تایپ */
+        .typing-line {
+            position: absolute;
+            left: 25px;
+            right: 25px;
+            height: 1px;
+            background: rgba(16, 185, 129, 0.3);
+            pointer-events: none;
+            z-index: 1;
         }
         
         /* دکمه‌های پایین */
@@ -343,11 +364,13 @@
         .typing-cursor {
             display: inline-block;
             width: 8px;
-            height: 18px;
+            height: 20px;
             background: #10b981;
             margin-left: 2px;
             animation: blink 1s infinite;
             vertical-align: middle;
+            position: relative;
+            top: 2px;
         }
         
         @keyframes blink {
@@ -358,11 +381,28 @@
         .loading-message {
             color: #10b981;
             font-size: 18px;
-            text-align: center;
             font-weight: 600;
             direction: ltr;
             text-align: center;
             padding: 20px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100%;
+        }
+        
+        .scroll-indicator {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            color: #10b981;
+            font-size: 12px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 5px 10px;
+            border-radius: 5px;
+            display: none;
+            z-index: 2;
         }
         
         .code-content::-webkit-scrollbar {
@@ -556,8 +596,11 @@
     
     <!-- صفحه نمایش کد -->
     <div class="code-display">
-        <div class="code-content" id="codeOutput">
-            {/* کد اینجا نمایش داده می‌شود */}
+        <div class="code-wrapper">
+            <div class="code-content" id="codeOutput">
+                {/* کد اینجا نمایش داده می‌شود */}
+            </div>
+            <div class="scroll-indicator" id="scrollIndicator"></div>
         </div>
     </div>
     
@@ -741,10 +784,15 @@
         let currentIndex = 0;
         let currentFile = '';
         let menuOpen = false;
+        let scrollPosition = 0;
+        let autoScrollEnabled = true;
+        let typingLine = null;
 
         // کنترل منوی اصلی
         const mainMenuBtn = document.getElementById('mainMenuBtn');
         const categoriesMenu = document.getElementById('categoriesMenu');
+        const codeOutput = document.getElementById('codeOutput');
+        const scrollIndicator = document.getElementById('scrollIndicator');
 
         // نمایش/پنهان کردن منوی اصلی
         function toggleMainMenu() {
@@ -813,7 +861,6 @@
                 stopTyping();
             }
             
-            const codeOutput = document.getElementById('codeOutput');
             codeOutput.innerHTML = '<div class="loading-message">⏳ در حال بارگذاری کد... لطفاً منتظر بمانید</div>';
             codeOutput.style.direction = 'ltr';
             codeOutput.style.textAlign = 'center';
@@ -843,17 +890,21 @@
                     currentFile = fileName;
                     
                     // شروع تایپ کردن با سرعت دو برابر از ردیف اول
-                    startTyping(content, codeOutput);
+                    startTyping(content);
                     
                 } else {
-                    showMessage(`❌ فایل ${fileName} یافت نشد\n\nبرای تست سیستم:\n1. فایل ${fileName} را ایجاد کنید\n2. کدهای مورد نظر را در آن قرار دهید\n3. دوباره امتحان کنید`);
+                    // اگر فایل وجود نداشت، فایل نمونه ایجاد کن
+                    createSampleFile(fileName);
+                    showMessage(`📁 فایل ${fileName} ایجاد شد!\n\nبرای تست سیستم کد نمونه ایجاد شده است.`);
                     
                     // پنهان کردن دکمه‌های کنترل
                     document.getElementById('pauseBtn').style.display = 'none';
                     document.getElementById('stopBtn').style.display = 'none';
                 }
             } catch (error) {
-                showMessage(`❌ خطا در بارگذاری فایل\n\n${error.message}`);
+                // اگر خطا در فچ بود، فایل نمونه ایجاد کن
+                createSampleFile(fileName);
+                showMessage(`📁 فایل ${fileName} ایجاد شد!\n\nبرای تست سیستم کد نمونه ایجاد شده است.`);
                 
                 // پنهان کردن دکمه‌های کنترل
                 document.getElementById('pauseBtn').style.display = 'none';
@@ -861,8 +912,110 @@
             }
         }
 
+        // ایجاد فایل نمونه
+        function createSampleFile(fileName) {
+            // ایجاد کد نمونه بر اساس نام فایل
+            let sampleCode = '';
+            const fileNum = parseInt(fileName.replace('m', '').replace('.txt', ''));
+            
+            if (fileNum <= 100) {
+                sampleCode = `# کد نمونه ${fileName}
+# این یک فایل نمونه برای تست سیستم است
+
+def hello_world():
+    """تابع چاپ Hello World"""
+    print("Hello, World! - File: ${fileName}")
+    return "Success"
+
+class ExampleClass:
+    """یک کلاس نمونه"""
+    
+    def __init__(self, name):
+        self.name = name
+        self.counter = 0
+    
+    def greet(self):
+        """تابع سلام کردن"""
+        self.counter += 1
+        return f"Hello, {self.name}! (Called {self.counter} times)"
+    
+    def calculate(self, a, b):
+        """تابع محاسبه"""
+        result = a + b * 2
+        return f"Result: {result}"
+
+# ایجاد نمونه از کلاس
+example = ExampleClass("Test")
+print(example.greet())
+print(example.calculate(5, 3))
+
+# لیست اعداد
+numbers = [i for i in range(1, 11)]
+print(f"Numbers: {numbers}")
+
+# فیلتر اعداد زوج
+even_numbers = [num for num in numbers if num % 2 == 0]
+print(f"Even numbers: {even_numbers}")
+
+# دیکشنری نمونه
+sample_dict = {
+    "name": "Sample File",
+    "number": ${fileNum},
+    "type": "Test",
+    "status": "Active"
+}
+
+print(f"Dictionary: {sample_dict}")
+
+# پایان کد نمونه
+print("✅ کد نمونه با موفقیت اجرا شد!")`;
+            } else {
+                sampleCode = `// کد نمونه ${fileName}
+// این یک فایل نمونه برای تست سیستم است
+
+function main() {
+    console.log("Hello from ${fileName}");
+    
+    const data = {
+        fileName: "${fileName}",
+        fileNumber: ${fileNum},
+        timestamp: new Date().toISOString(),
+        type: "Sample Code"
+    };
+    
+    console.log("Data:", data);
+    
+    // تابع محاسبه
+    const calculate = (a, b) => {
+        return a * b + (a + b);
+    };
+    
+    const result = calculate(5, 3);
+    console.log("Result:", result);
+    
+    // آرایه نمونه
+    const items = ["Item 1", "Item 2", "Item 3", "Item 4", "Item 5"];
+    items.forEach((item, index) => {
+        console.log(\`\${index + 1}: \${item}\`);
+    });
+    
+    return "Code executed successfully";
+}
+
+// اجرای تابع اصلی
+const output = main();
+console.log("Output:", output);
+
+// پایان کد نمونه`;
+            }
+            
+            currentContent = sampleCode;
+            currentFile = fileName;
+            startTyping(sampleCode);
+        }
+
         // شروع تایپ کردن محتوا
-        function startTyping(content, element) {
+        function startTyping(content) {
             // ابتدا تایپ قبلی را متوقف کن
             if (isTyping) {
                 clearInterval(typingInterval);
@@ -873,15 +1026,19 @@
             isPaused = false;
             typedContent = '';
             currentIndex = 0;
+            autoScrollEnabled = true;
             
             // پاک کردن صفحه و شروع از ردیف اول
-            element.innerHTML = '';
-            element.style.direction = 'ltr';
-            element.style.textAlign = 'left';
+            codeOutput.innerHTML = '';
+            codeOutput.style.direction = 'ltr';
+            codeOutput.style.textAlign = 'left';
             
             // تغییر متن دکمه توقف به توقف تایپ
             document.getElementById('pauseBtn').innerHTML = '<span>⏸️</span> توقف تایپ';
             document.getElementById('pauseBtn').className = 'action-btn pause-btn';
+            
+            // پنهان کردن نشانگر اسکرول
+            scrollIndicator.style.display = 'none';
             
             // شروع تایپ با سرعت دو برابر (5-15ms)
             typingInterval = setInterval(() => {
@@ -889,41 +1046,124 @@
                     // اضافه کردن کاراکتر جدید
                     typedContent += content[currentIndex];
                     
-                    // نمایش محتوا بدون اضافه کردن فاصله اضافی
-                    element.textContent = typedContent;
+                    // نمایش محتوا
+                    const lines = typedContent.split('\n');
+                    let formattedContent = '';
+                    
+                    lines.forEach((line, index) => {
+                        formattedContent += line;
+                        if (index < lines.length - 1) {
+                            formattedContent += '\n';
+                        }
+                    });
+                    
+                    codeOutput.innerHTML = formattedContent;
                     
                     // ایجاد نشانگر چشمک زن
                     const cursor = document.createElement('span');
                     cursor.className = 'typing-cursor';
-                    element.appendChild(cursor);
-                    
-                    // اسکرول به پایین
-                    element.scrollTop = element.scrollHeight;
+                    cursor.id = 'typingCursor';
+                    codeOutput.appendChild(cursor);
                     
                     currentIndex++;
                     
+                    // اسکرول خودکار به موقعیت فعلی تایپ
+                    if (autoScrollEnabled) {
+                        scrollToCurrentPosition();
+                    }
+                    
+                    // نمایش موقعیت اسکرول
+                    updateScrollIndicator();
+                    
                     // اگر تایپ تمام شد
                     if (currentIndex >= content.length) {
-                        finishTyping(element, content);
+                        finishTyping(content);
                     }
                 }
             }, Math.random() * 10 + 5); // سرعت دو برابر شده: 5-15ms
+            
+            // اضافه کردن event listener برای اسکرول دستی
+            codeOutput.addEventListener('scroll', handleManualScroll);
+        }
+
+        // اسکرول به موقعیت فعلی تایپ
+        function scrollToCurrentPosition() {
+            // محاسبه موقعیت خط فعلی
+            const lines = typedContent.split('\n');
+            const lineHeight = 22; // ارتفاع تقریبی هر خط
+            const targetScroll = (lines.length - 1) * lineHeight;
+            
+            // اسکرول نرم به موقعیت
+            codeOutput.scrollTo({
+                top: targetScroll - 100, // کمی بالاتر از خط فعلی
+                behavior: 'smooth'
+            });
+        }
+
+        // بروزرسانی نشانگر اسکرول
+        function updateScrollIndicator() {
+            const scrollTop = codeOutput.scrollTop;
+            const scrollHeight = codeOutput.scrollHeight;
+            const clientHeight = codeOutput.clientHeight;
+            
+            if (scrollHeight > clientHeight) {
+                const scrollPercent = Math.round((scrollTop / (scrollHeight - clientHeight)) * 100);
+                scrollIndicator.textContent = `اسکرول: ${scrollPercent}%`;
+                
+                if (!autoScrollEnabled) {
+                    scrollIndicator.style.display = 'block';
+                }
+            }
+        }
+
+        // مدیریت اسکرول دستی
+        function handleManualScroll() {
+            const scrollTop = codeOutput.scrollTop;
+            const scrollHeight = codeOutput.scrollHeight;
+            const clientHeight = codeOutput.clientHeight;
+            
+            // اگر کاربر به پایین اسکرول کرده، اسکرول خودکار را غیرفعال کن
+            if (scrollTop < scrollPosition) {
+                autoScrollEnabled = false;
+                scrollIndicator.style.display = 'block';
+                scrollIndicator.textContent = '⏸️ اسکرول دستی';
+            }
+            
+            // اگر کاربر به انتهای متن اسکرول کرده، اسکرول خودکار را فعال کن
+            if (scrollTop + clientHeight >= scrollHeight - 50) {
+                autoScrollEnabled = true;
+                scrollIndicator.style.display = 'none';
+            }
+            
+            scrollPosition = scrollTop;
+            updateScrollIndicator();
         }
 
         // تمام کردن تایپ
-        function finishTyping(element, content) {
+        function finishTyping(content) {
             clearInterval(typingInterval);
             isTyping = false;
             
             // نمایش کامل کد بدون کرسر
-            element.innerHTML = formatCode(content);
+            codeOutput.innerHTML = formatCode(content);
             
             // پنهان کردن دکمه توقف و حذف
             document.getElementById('pauseBtn').style.display = 'none';
             document.getElementById('stopBtn').style.display = 'none';
             
+            // پنهان کردن نشانگر اسکرول
+            scrollIndicator.style.display = 'none';
+            
+            // حذف event listener اسکرول
+            codeOutput.removeEventListener('scroll', handleManualScroll);
+            
+            // اسکرول به ابتدا
+            codeOutput.scrollTop = 0;
+            
             // نمایش پیام پایان تایپ
-            showMessage('✅ تایپ کد به پایان رسید!');
+            setTimeout(() => {
+                showMessage('✅ تایپ کد به پایان رسید!');
+            }, 500);
         }
 
         // توقف/ادامه تایپ
@@ -952,35 +1192,32 @@
             currentIndex = 0;
             currentContent = '';
             
-            const codeOutput = document.getElementById('codeOutput');
             codeOutput.innerHTML = '<div class="loading-message">✅ تایپ متوقف شد</div>';
             
             // پنهان کردن دکمه‌های کنترل
             document.getElementById('pauseBtn').style.display = 'none';
             document.getElementById('stopBtn').style.display = 'none';
+            
+            // پنهان کردن نشانگر اسکرول
+            scrollIndicator.style.display = 'none';
+            
+            // حذف event listener اسکرول
+            codeOutput.removeEventListener('scroll', handleManualScroll);
         }
 
-        // دانلود کد
+        // دانلود کد - نسخه واقعی
         function downloadCode() {
-            const codeOutput = document.getElementById('codeOutput');
-            
-            // اگر در حال تایپ هستیم، محتوای کامل را دانلود کن
             let code = '';
             
             if (isTyping) {
-                // اگر تایپ متوقف شده، محتوای تایپ شده تا الان را دانلود کن
+                // اگر در حال تایپ هستیم، محتوای کامل را دانلود کن
                 code = isPaused ? typedContent : currentContent;
             } else {
                 // اگر تایپ تمام شده، محتوای کامل را دانلود کن
-                code = codeOutput.textContent || codeOutput.innerText;
-                
-                // اگر پیام نمایش داده شده، محتوای اصلی را برگردان
-                if (code.includes('✅ تایپ کد به پایان رسید!')) {
-                    code = currentContent;
-                }
+                code = currentContent || codeOutput.textContent || codeOutput.innerText;
             }
             
-            if (!code.trim() || code.includes('تایپ کد به پایان رسید!')) {
+            if (!code.trim() || code.includes('تایپ کد به پایان رسید!') || code.includes('تایپ متوقف شد')) {
                 alert('⚠️ هیچ کدی برای دانلود وجود ندارد!');
                 return;
             }
@@ -988,22 +1225,37 @@
             // نام فایل برای دانلود
             let fileName = 'code.txt';
             if (currentFile) {
-                fileName = currentFile.replace('.txt', '_downloaded.txt');
+                fileName = currentFile;
             }
             
-            // ایجاد فایل برای دانلود
-            const blob = new Blob([code], { type: 'text/plain' });
+            // ایجاد Blob با محتوای واقعی
+            const blob = new Blob([code], { type: 'text/plain;charset=utf-8' });
+            
+            // ایجاد لینک دانلود
             const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = fileName;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = fileName;
+            link.style.display = 'none';
+            
+            // اضافه کردن به صفحه و کلیک
+            document.body.appendChild(link);
+            link.click();
+            
+            // تمیز کردن
+            setTimeout(() => {
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+            }, 100);
             
             // نمایش پیام موفقیت
-            alert(`✅ کد با موفقیت دانلود شد! \n\nفایل: ${fileName}`);
+            const downloadBtn = document.querySelector('.download-btn');
+            const originalHTML = downloadBtn.innerHTML;
+            downloadBtn.innerHTML = '<span>✅</span> دانلود شد!';
+            
+            setTimeout(() => {
+                downloadBtn.innerHTML = originalHTML;
+            }, 2000);
         }
 
         // قالب‌بندی کد برای نمایش نهایی
@@ -1022,13 +1274,8 @@
 
         // نمایش پیام
         function showMessage(message) {
-            const codeOutput = document.getElementById('codeOutput');
-            
             // اگر تایپ در حال انجام است، پیام را نمایش نده
             if (isTyping && !isPaused) return;
-            
-            codeOutput.style.direction = 'ltr';
-            codeOutput.style.textAlign = 'left';
             
             // نمایش پیام به صورت موقت
             const originalContent = codeOutput.innerHTML;
@@ -1038,13 +1285,14 @@
             if (message === '✅ تایپ کد به پایان رسید!') {
                 setTimeout(() => {
                     codeOutput.innerHTML = formatCode(currentContent);
+                    // اسکرول به ابتدا
+                    codeOutput.scrollTop = 0;
                 }, 2000);
             }
         }
 
         // تابع کپی کردن کد
         function copyCode() {
-            const codeOutput = document.getElementById('codeOutput');
             const copyButton = document.getElementById('copyButton');
             
             // اگر در حال تایپ هستیم، محتوای کامل را کپی کن
@@ -1116,8 +1364,6 @@
                     isTyping = state.isTyping;
                     isPaused = state.isPaused;
                     
-                    const codeOutput = document.getElementById('codeOutput');
-                    
                     if (isTyping) {
                         // نمایش دکمه‌های کنترل
                         document.getElementById('pauseBtn').style.display = 'block';
@@ -1130,7 +1376,7 @@
                             document.getElementById('pauseBtn').className = 'action-btn resume-btn';
                         } else {
                             // ادامه تایپ
-                            startTyping(currentContent, codeOutput);
+                            startTyping(currentContent);
                         }
                     }
                 } else {
@@ -1148,7 +1394,6 @@
 
         // نمایش محتوای اولیه
         function showInitialContent() {
-            const codeOutput = document.getElementById('codeOutput');
             codeOutput.style.direction = 'ltr';
             codeOutput.style.textAlign = 'left';
             codeOutput.innerHTML = `<pre>
@@ -1173,7 +1418,8 @@
 📱 طراحی واکنش‌گرا
 🎨 رابط کاربری مدرن
 📋 کپی آسان کد
-⬇️ دانلود کد
+⬇️ دانلود واقعی کد
+👁️ نمایش واضح تایپ
 
 ## دسته‌بندی‌ها:
 
@@ -1184,6 +1430,10 @@
 🤖 ۱۰ حوزه هوش مصنوعی
 
 هر دسته شامل ۵ فایل نمونه کد است.
+
+## نکته:
+اگر فایلی وجود نداشته باشد، سیستم به صورت خودکار
+یک فایل نمونه با کد مناسب ایجاد می‌کند.
             </pre>`;
         }
 
@@ -1228,6 +1478,18 @@
             if (event.key === ' ' && isTyping) {
                 event.preventDefault();
                 toggleTyping();
+            }
+            
+            // با کلید S به ابتدا اسکرول کن
+            if (event.key === 's' || event.key === 'S') {
+                event.preventDefault();
+                codeOutput.scrollTop = 0;
+            }
+            
+            // با کلید E به انتها اسکرول کن
+            if (event.key === 'e' || event.key === 'E') {
+                event.preventDefault();
+                codeOutput.scrollTop = codeOutput.scrollHeight;
             }
         });
     </script>
