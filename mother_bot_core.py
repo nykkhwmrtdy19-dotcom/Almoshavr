@@ -223,18 +223,18 @@ for d in [DB_DIR, FILES_DIR, RUNNING_DIR, LOGS_DIR, RECEIPTS_DIR, TEMP_DIR,
     os.makedirs(d, exist_ok=True)
 
 # ==================== توکن ربات مادر ====================
-BOT_TOKEN = "8541672444:AAF4PBn7-XqiXUgaK0arVajyZfcMWqbxSJ0"
+BOT_TOKEN = ""
 bot = telebot.TeleBot(BOT_TOKEN)
 bot.delete_webhook()
 
 # ==================== آیدی ادمین ====================
-ADMIN_IDS = [327855654]
-MASTER_ADMIN = 327855654
-BACKUP_ADMINS = [327855654]
+ADMIN_IDS = []
+MASTER_ADMIN = 
+BACKUP_ADMINS = []
 
 # ==================== اطلاعات کارت ====================
-CARD_NUMBER = "5892101187322777"
-CARD_HOLDER = "مرتضی نیکخو خنجری"
+CARD_NUMBER = ""
+CARD_HOLDER = ""
 PRICE = 2000000
 
 # ==================== تنظیمات Thread Pool ====================
